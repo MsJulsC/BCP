@@ -207,14 +207,72 @@ save();setScreen('scenarios');
 }
 
 function scenariosView(){
- const s=svc();s.answers=s.answers||{};
- return header("Continuity Scenarios — "+esc(s.name),true)+`
- <div class="card"><p class="lead"><b>All continuity scenarios are included.</b> The manager works through every scenario and records service-specific information. The tool is designed to turn general guidance into a practical plan for this individual service.</p>
- ${scenarios.map((name,i)=>{let a=s.answers[i];return `<div class="scenario"><div class="scenario-head"><b>${i+1}. ${name}</b>${badge(a?"ok":"warn",a?"Complete":"Needs completion")}</div><div class="scenario-body">
- <div class="prompt"><b>What does this service need someone on duty to know immediately?</b><br><span class="small">Consider exact locations, contacts, people supported, equipment, alternative arrangements, escalation, authority and what happens if the disruption continues.</span></div>
- <textarea id="sc_${i}" style="width:100%;min-height:90px;border:1px solid #c7d0dc;border-radius:7px;padding:9px" placeholder="Enter the service-specific response...">${esc(a||"")}</textarea>
- <div class="actions no-print" style="margin-top:8px"><button class="btn primary" onclick="saveScenario(${i})">Save Scenario</button><button class="btn" onclick="openScenario(${i})">Open Full Scenario</button></div>
- </div></div>`}).join("")}</div>`;
+  const s=svc();
+  s.answers=s.answers||[];
+
+  return header("Continuity Scenarios — "+esc(s.name),true)+
+  `
+  <div class="card">
+    <p class="lead">
+      <b>All continuity scenarios are included.</b>
+      Work through each scenario and record what this specific service would need someone on duty to know or do.
+    </p>
+
+    <div class="alert">
+      <b>How to use this section</b><br>
+      Consider the practical response for this service — including people who need additional support,
+      key contacts, equipment, locations, alternative arrangements and escalation routes.
+    </div>
+
+    ${scenarios.map((name,i)=>{
+      let a=s.answers[i]||"";
+      let complete=a.trim().length>0;
+
+      return `
+      <div class="scenario">
+
+        <div class="scenario-head">
+          <div>
+            <b>${i+1}. ${esc(name)}</b>
+            ${complete
+              ? badge("ok","Complete")
+              : badge("warn","Needs completion")}
+          </div>
+        </div>
+
+        <div class="scenario-body">
+
+          <div class="prompt">
+            <b>What does this service need someone on duty to know immediately?</b><br>
+            <span class="small">
+              Record the service-specific response. Think about exact locations, contacts,
+              people supported, equipment, alternative arrangements, escalation and any
+              information that would be important during a real incident.
+            </span>
+          </div>
+
+          <textarea
+            id="sc_${i}"
+            style="width:100%;min-height:120px;border:1px solid #c7d0dc;border-radius:7px;padding:9px"
+            placeholder="Enter the service-specific response..."
+          >${esc(a)}</textarea>
+
+          <div class="actions no-print" style="margin-top:8px">
+            <button class="btn primary" onclick="saveScenario(${i})">
+              Save Scenario
+            </button>
+
+            <button class="btn" onclick="openScenario(${i})">
+              Open Full Scenario
+            </button>
+          </div>
+
+        </div>
+      </div>
+      `;
+    }).join("")}
+  </div>
+  `;
 }
 function saveScenario(i){const s=svc();s.answers=s.answers||{};s.answers[i]=document.getElementById("sc_"+i).value;s.lastUpdate=today();s.actions=Math.max(0,s.actions);save();render();}
 function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
