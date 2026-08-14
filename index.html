@@ -383,7 +383,7 @@ function learning(){
  ${s.learning.map((l,i)=>`<tr><td>${esc(l.date)}</td><td>${esc(l.type)}</td><td>${esc(l.scenario)}</td><td>${esc(l.learning)}</td><td>${l.update==="YES"?badge("warn","YES"):badge("ok","NO")}</td><td>${l.update==="YES"?`<button class="btn primary" onclick="rebranch(${i})">Update BCP Scenario</button>`:"Closed"}</td></tr>`).join("")}</table></div>`;
 }
 function newLog(type){
- const s=svc(),n=prompt("Which continuity scenario?\\n\\nEnter the scenario number (1–"+scenarios.length+"):");
+const s=svc(),n=prompt("Which continuity scenario?\n\n"+scenarios.map((name,i)=>(i+1)+". "+name).join("\n")+"\n\nEnter the scenario number:");
  if(!n)return;let i=Math.max(1,Math.min(scenarios.length,parseInt(n,10)||1))-1;
  const learning=prompt("What happened / what did you learn?");if(learning===null)return;
  const update=confirm("Does this learning require the BCP to be updated?\\n\\nOK = YES\\nCancel = NO")?"YES":"NO";
