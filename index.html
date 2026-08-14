@@ -283,49 +283,94 @@ function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
 function scenario(){
   const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||[])[i]||"";
 
-  return header("Continuity Scenario – "+name,true)+
-  `<div class="card">
+  return header("Continuity Scenario - "+name,true)+`
+
+  <div class="card">
+
     <div class="alert">
       <b>Scenario purpose</b><br>
-      This section turns the continuity scenario into a practical, service-specific response that someone on duty could use during a real incident.
+      This section helps you think through what someone on duty would need to know and do if this disruption happened at your service.
+      The aim is to capture practical, service-specific information rather than general instructions.
     </div>
 
     <h3>Prompts for the manager</h3>
 
     <div class="prompt">
       <b>1. What should happen first?</b><br>
-      <span class="small">Describe the immediate actions the person on duty should take.</span>
+      <span class="small">
+        What are the immediate actions the person on duty should take?
+        Think about keeping people safe, assessing the situation and escalating appropriately.
+      </span>
     </div>
 
     <div class="prompt">
       <b>2. Who needs to be contacted, and how?</b><br>
-      <span class="small">Include relevant internal contacts, emergency services, professionals, families or other key people.</span>
+      <span class="small">
+        Include relevant internal contacts, emergency services, professionals, families,
+        suppliers or other key people. Where useful, include names, roles and contact details.
+      </span>
     </div>
 
     <div class="prompt">
-      <b>3. Where are the relevant isolation points, equipment or documents?</b><br>
-      <span class="small">Be specific about locations and anything that must be accessed quickly.</span>
+      <b>3. Who is most affected by this disruption?</b><br>
+      <span class="small">
+        Consider people supported at the service, their individual needs, communication,
+        mobility, health, routines, behaviours, equipment and any additional risks.
+      </span>
     </div>
 
     <div class="prompt">
-      <b>4. Who requires additional assistance and what must be considered?</b><br>
-      <span class="small">Consider people's individual needs, communication, mobility, health, support arrangements and any other relevant risks.</span>
+      <b>4. What equipment, information or documents might be needed?</b><br>
+      <span class="small">
+        Think about essential equipment, medication, records, emergency information,
+        keys, access arrangements, contact lists and anything else that may be needed quickly.
+      </span>
     </div>
 
     <div class="prompt">
-      <b>5. What alternative arrangements may be needed?</b><br>
-      <span class="small">Record alternative accommodation, staffing, equipment, transport, medication, communication or other arrangements where relevant.</span>
+      <b>5. Where is everything located?</b><br>
+      <span class="small">
+        Be specific. For example: water stop cock, gas isolation point, electrical isolation point,
+        fire equipment, emergency grab bag, keys, important documents or alternative equipment.
+      </span>
+    </div>
+
+    <div class="prompt">
+      <b>6. What alternative arrangements would be needed?</b><br>
+      <span class="small">
+        Consider alternative accommodation, staffing, food, medication, transport,
+        equipment, communication or other arrangements.
+      </span>
+    </div>
+
+    <div class="prompt">
+      <b>7. What could make this situation worse?</b><br>
+      <span class="small">
+        Consider foreseeable risks, vulnerable people, time of day, staffing levels,
+        access issues, weather, neighbouring services or other factors that could affect the response.
+      </span>
+    </div>
+
+    <div class="prompt">
+      <b>8. What would someone unfamiliar with this service need to know?</b><br>
+      <span class="small">
+        Imagine a manager from another service has to take charge. What information would
+        they need immediately to make safe and informed decisions?
+      </span>
     </div>
 
     <div class="field">
       <label>Service-specific contingency plan</label>
-      <textarea id="fullsc" style="width:100%;min-height:260px">${esc(a)}</textarea>
+      <textarea id="fullsc" style="width:100%;min-height:300px"
+        placeholder="Use the prompts above to record the practical arrangements for this service.">${esc(a)}</textarea>
     </div>
 
     <div class="actions no-print" style="margin-top:12px">
       <button class="btn primary" onclick="saveFullScenario()">Save Scenario</button>
       <button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button>
+      <button class="btn teal" onclick="setScreen('learning')">Open Learning Log</button>
     </div>
+
   </div>`;
 }
 function saveFullScenario(){const s=svc();s.answers=s.answers||{};s.answers[s.currentScenario||0]=document.getElementById("fullsc").value;s.lastUpdate=today();save();setScreen("scenarios");}
