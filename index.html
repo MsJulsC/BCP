@@ -207,7 +207,7 @@ function saveInfo(){
 }
 
 function scenariosView(){
- const s=svc();s.answers=s.answers||{};
+ const s=svc();s.answers=Array.isArray(s.answers)?s.answers:[];
  return header("Continuity Scenarios — "+esc(s.name),true)+`
  <div class="card"><p class="lead"><b>All continuity scenarios are included.</b> The manager works through every scenario and records service-specific information. The tool is designed to turn general guidance into a practical plan for this individual service.</p>
  ${scenarios.map((name,i)=>{let a=s.answers[i];return `<div class="scenario"><div class="scenario-head"><b>${i+1}. ${name}</b>${badge(a?"ok":"warn",a?"Complete":"Needs completion")}</div><div class="scenario-body">
