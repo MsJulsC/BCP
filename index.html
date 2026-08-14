@@ -219,14 +219,52 @@ function scenariosView(){
 function saveScenario(i){const s=svc();s.answers=s.answers||{};s.answers[i]=document.getElementById("sc_"+i).value;s.lastUpdate=today();s.actions=Math.max(0,s.actions);save();render();}
 function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
 function scenario(){
- const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||{})[i]||"";
- return header("Continuity Scenario — "+name,true)+`
- <div class="card"><div class="alert"><b>Scenario purpose</b><br>This section turns the continuity scenario into a practical, service-specific response that someone on duty could use during a real incident.</div>
- <h3>Prompts for the manager</h3>
- ${["What should happen first?","Who needs to be contacted, and how?","Where are the relevant isolation points / equipment / documents?","Who requires additional assistance and what must be considered?","What alternative accommodation, staffing, food, laundry, transport or care arrangements are available?","What happens if the disruption continues beyond 4 / 12 / 24 / 48 hours?","Who has authority to escalate, relocate people supported or authorise emergency expenditure?"].map(x=>`<div class="prompt"><b>${x}</b></div>`).join("")}
- <div class="field"><label>Service-specific contingency plan</label><textarea id="fullsc" style="width:100%;min-height:230px">${esc(a)}</textarea></div>
- <div class="actions no-print" style="margin-top:12px"><button class="btn primary" onclick="saveFullScenario()">Save Scenario</button><button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button><button class="btn teal" onclick="setScreen('learning')">Open Learning Log</button></div>
- </div>`;
+  const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||[])[i]||"";
+
+  return header("Continuity Scenario – "+name,true)+
+  `<div class="card">
+    <div class="alert">
+      <b>Scenario purpose</b><br>
+      This section turns the continuity scenario into a practical, service-specific response that someone on duty could use during a real incident.
+    </div>
+
+    <h3>Prompts for the manager</h3>
+
+    <div class="prompt">
+      <b>1. What should happen first?</b><br>
+      <span class="small">Describe the immediate actions the person on duty should take.</span>
+    </div>
+
+    <div class="prompt">
+      <b>2. Who needs to be contacted, and how?</b><br>
+      <span class="small">Include relevant internal contacts, emergency services, professionals, families or other key people.</span>
+    </div>
+
+    <div class="prompt">
+      <b>3. Where are the relevant isolation points, equipment or documents?</b><br>
+      <span class="small">Be specific about locations and anything that must be accessed quickly.</span>
+    </div>
+
+    <div class="prompt">
+      <b>4. Who requires additional assistance and what must be considered?</b><br>
+      <span class="small">Consider people's individual needs, communication, mobility, health, support arrangements and any other relevant risks.</span>
+    </div>
+
+    <div class="prompt">
+      <b>5. What alternative arrangements may be needed?</b><br>
+      <span class="small">Record alternative accommodation, staffing, equipment, transport, medication, communication or other arrangements where relevant.</span>
+    </div>
+
+    <div class="field">
+      <label>Service-specific contingency plan</label>
+      <textarea id="fullsc" style="width:100%;min-height:260px">${esc(a)}</textarea>
+    </div>
+
+    <div class="actions no-print" style="margin-top:12px">
+      <button class="btn primary" onclick="saveFullScenario()">Save Scenario</button>
+      <button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button>
+    </div>
+  </div>`;
 }
 function saveFullScenario(){const s=svc();s.answers=s.answers||{};s.answers[s.currentScenario||0]=document.getElementById("fullsc").value;s.lastUpdate=today();save();setScreen("scenarios");}
 
