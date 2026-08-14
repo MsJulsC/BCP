@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCP Builder — Version 7</title>
+<style>
+:root{--ink:#1f2937;--muted:#64748b;--line:#d8dee7;--panel:#f7f9fc;--brand:#1f4e79;--accent:#0f766e;--warn:#a16207;--danger:#b42318;--ok:#166534}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef2f6;color:var(--ink)}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{max-width:1180px;margin:0 auto;padding:22px}
+.topbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;gap:16px;align-items:center;justify-content:space-between;box-shadow:0 2px 8px #0000000a}
+.brand{font-size:21px;font-weight:700;color:var(--brand)}.sub{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #b8c3d1;background:#fff;border-radius:8px;padding:9px 12px;color:var(--ink)}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn.teal{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.warn{background:#fff7df;border-color:#e2b94d;color:#7c5200}
+.statusbar{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #b7d7c2;background:#edf9f0;color:var(--ok);font-size:13px}.statusbar.warn{border-color:#e2b94d;background:#fff8e6;color:#7c5200}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px;box-shadow:0 2px 8px #00000008}
+h1{font-size:24px;margin:0 0 6px;color:var(--brand)}h2{font-size:18px;margin:0 0 8px}h3{font-size:14px;margin:16px 0 7px}.lead{color:#475569;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px}.metric b{display:block;font-size:18px}.metric span{font-size:11px;color:var(--muted)}
+.fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;border:1px solid #c7d0dc;border-radius:7px;padding:9px;background:#fff}.field textarea{min-height:72px;resize:vertical}
+.scenario{border:1px solid var(--line);border-radius:9px;margin:8px 0;overflow:hidden}.scenario-head{padding:12px;background:#f7f9fc;display:flex;justify-content:space-between;align-items:center;gap:10px}.scenario-head b{font-size:14px}.pill{font-size:11px;border-radius:999px;padding:4px 8px;background:#e8f5ed;color:var(--ok)}.pill.open{background:#fff2d6;color:#805500}.scenario-body{padding:14px}.prompt{background:#f8fafc;border-left:4px solid var(--brand);padding:10px;margin:8px 0}.prompt b{font-size:12px}.small{font-size:12px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:left}.table th{background:#f1f5f9}.flow{display:flex;gap:7px;align-items:stretch;flex-wrap:wrap}.flow .step{flex:1;min-width:130px;border:1px solid var(--line);background:#f8fafc;border-radius:9px;padding:10px;text-align:center;font-size:12px}.arrow{align-self:center;color:var(--brand);font-weight:700}
+.alert{border:1px solid #e2b94d;background:#fff8e6;border-radius:9px;padding:12px;color:#7c5200}.success{border:1px solid #b7d7c2;background:#edf9f0;border-radius:9px;padding:12px;color:var(--ok)}
+.footer{color:#718096;font-size:11px;padding:18px 2px;text-align:center}
+.hidden{display:none!important}
+@media(max-width:800px){.grid,.fieldgrid{grid-template-columns:1fr}.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column}}
+@media print{body{background:#fff}.app{max-width:none;padding:0}.no-print{display:none!important}.card{box-shadow:none;break-inside:avoid}.topbar{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="app"></div>
+  <div class="footer">BCP Builder — Version 7 visual prototype • For review and discussion</div>
+</div>
+<script>
+const continuityScenarios = [
+"Loss of all or a significant part of the building","Loss of Kitchen","Loss of individual bedroom(s)",
+"Staffing levels","Outbreak of contagious illness / Working through a Pandemic","Loss of Electricity",
+"Loss of Gas Supply","Water or sewerage supply","Heating & hot water","Breakdown of essential white goods",
+"Loss of landline telephone","Computer system","IT failure","Loss of paper records","Loss of key partner or supplier",
+"Fuel Shortage","Extreme Weather Conditions"
+];
+let state = JSON.parse(localStorage.getItem("bcp7")||"null") || {
+service:"Meadow House", address:"Example address, town, postcode", phone:"01234 000000", manager:"Registered Manager",
+updated:"12 August 2026", printed:"12 August 2026", currentScenario:6,
+scenarioAnswers:{}, logs:[
+ {date:"10/08/2026",type:"Real incident",scenario:"Loss of Gas Supply",learning:"Assembly arrangements were clear; alternative accommodation contact was out of date.",update:"YES",action:"Update scenario"},
+ {date:"01/07/2026",type:"Planned exercise",scenario:"Staffing levels",learning:"Bank list worked; escalation threshold was unclear.",update:"YES",action:"Update scenario"}
+], openActions:2
+};
+function save(){localStorage.setItem("bcp7",JSON.stringify(state));}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function setScreen(name){state.screen=name;save();render();window.scrollTo({top:0,behavior:"smooth"});}
+function header(title){
+ const stale=state.updated!==state.printed;
+ return `<div class="topbar">
+   <div><div class="brand">Business Continuity Plan Builder</div><div class="sub">Service: ${esc(state.service)} • Version 7 prototype</div></div>
+   <div class="actions no-print">
+    <button class="btn" onclick="setScreen('home')">Home</button>
+    <button class="btn" onclick="setScreen('learning')">Learning Log</button>
+    <button class="btn" onclick="printBCP()">Print BCP</button>
+   </div>
+ </div>
+ <div class="statusbar ${stale?'warn':''}">${stale?'⚠ PRINT REQUIRED — the live BCP has changed since the grab-bag copy was printed.':'✓ Grab-bag copy current — live BCP matches printed version.'}</div>
+ <div class="card"><h1>${title}</h1></div>`;
+}
+function home(){
+ return header("BCP Builder Home / Service Dashboard")+`
+ <div class="card">
+  <p class="lead">This is the starting point for the service BCP. The <b>Learning Log</b> is available from this page and should be used for both planned tests/exercises and real incidents or disruptions.</p>
+  <div class="grid">
+   <div class="metric"><b>${esc(state.service)}</b><span>Service</span></div>
+   <div class="metric"><b>${state.updated}</b><span>Last BCP update</span></div>
+   <div class="metric"><b>${state.updated===state.printed?'✓ Current':'⚠ Update required'}</b><span>Grab-bag copy</span></div>
+   <div class="metric"><b>${state.openActions}</b><span>Open learning actions</span></div>
+  </div>
+  <div class="actions no-print" style="margin-top:14px">
+   <button class="btn primary" onclick="setScreen('info')">Open / Edit BCP</button>
+   <button class="btn teal" onclick="setScreen('learning')">Open Learning Log</button>
+   <button class="btn warn" onclick="printBCP()">Print Current BCP</button>
+  </div>
+ </div>
+ <div class="card">
+  <h2>Learning → Action → BCP Update</h2>
+  <div class="flow">
+   <div class="step"><b>Test or real incident</b><br>Record what happened</div><div class="arrow">→</div>
+   <div class="step"><b>Learning Log</b><br>Capture what worked / did not</div><div class="arrow">→</div>
+   <div class="step"><b>Does BCP need updating?</b><br>Yes / No</div><div class="arrow">→</div>
+   <div class="step"><b>YES → Scenario</b><br>Update the relevant plan</div><div class="arrow">→</div>
+   <div class="step"><b>Print required</b><br>Replace grab-bag copy</div>
+  </div>
+ </div>
+ <div class="card">
+  <h2>Quick access</h2>
+  <div class="actions no-print">
+   <button class="btn" onclick="setScreen('scenarios')">Continuity Scenarios</button>
+   <button class="btn" onclick="setScreen('learning')">Testing / Incident & Learning Log</button>
+   <button class="btn" onclick="setScreen('print')">Grab-bag / Print Control</button>
+  </div>
+ </div>`;
+}
+function info(){
+ return header("Service Information")+`
+ <div class="card"><div class="fieldgrid">
+  ${field("Service name","service")}${field("Full address","address")}${field("Main contact number","phone")}${field("Registered Manager","manager")}
+ </div>
+ <h3>Emergency reference information</h3>
+ <div class="fieldgrid">
+  ${field("Area Operations Manager","aom")}${field("On-call contact","oncall")}${field("Emergency assembly point","assembly")}${field("Alternative assembly point","assembly2")}
+  ${field("Emergency grab bag location","grab")}${field("Gas isolation point","gas")}${field("Electricity isolation point","electric")}${field("Water isolation point","water")}
+ </div>
+ <div class="actions no-print" style="margin-top:14px"><button class="btn primary" onclick="saveInfo()">Save & Continue</button><button class="btn" onclick="setScreen('home')">Back</button></div>
+ </div>`;
+}
+function field(label,key){return `<div class="field"><label>${label}</label><input id="f_${key}" value="${esc(state[key]||"")}"></div>`}
+function saveInfo(){
+ ["service","address","phone","manager","aom","oncall","assembly","assembly2","grab","gas","electric","water"].forEach(k=>{let e=document.getElementById("f_"+k);if(e)state[k]=e.value});
+ state.updated=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"}); save(); setScreen("scenarios");
+}
+function renderScenarios(){
+ return header("Continuity Scenarios")+`
+ <div class="card"><p class="lead"><b>All continuity scenarios are included.</b> The manager works through each one and records service-specific information. Prompts help turn general guidance into a practical plan for this individual service.</p>
+ ${continuityScenarios.map((s,i)=>{let a=state.scenarioAnswers[i];return `<div class="scenario">
+   <div class="scenario-head"><b>${i+1}. ${s}</b><span class="pill ${a?'':'open'}">${a?'✓ Complete':'Needs completion'}</span></div>
+   <div class="scenario-body">
+    <div class="prompt"><b>What does this service need someone on duty to know immediately?</b><br><span class="small">Consider exact locations, contacts, people supported, equipment, alternative arrangements, escalation, authority and what happens if the disruption continues.</span></div>
+    <textarea id="sc_${i}" style="width:100%;min-height:90px;border:1px solid #c7d0dc;border-radius:7px;padding:9px" placeholder="Enter the service-specific response...">${esc(a||"")}</textarea>
+    <div class="actions no-print" style="margin-top:8px"><button class="btn primary" onclick="saveScenario(${i})">Save Scenario</button><button class="btn" onclick="openScenario(${i})">Open Full Scenario</button></div>
+   </div></div>`}).join("")}</div>`;
+}
+function saveScenario(i){
+ state.scenarioAnswers[i]=document.getElementById("sc_"+i).value;
+ state.updated=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"}); save(); render();
+}
+function openScenario(i){state.currentScenario=i;setScreen("scenario");}
+function scenario(){
+ let i=state.currentScenario,s=continuityScenarios[i],a=state.scenarioAnswers[i]||"";
+ return header("Continuity Scenario — "+s)+`
+ <div class="card">
+  <div class="alert"><b>Scenario purpose</b><br>This section turns the continuity scenario into a practical, service-specific response that someone on duty could use during a real incident.</div>
+  <h3>Prompts for the manager</h3>
+  ${[
+   "What should happen first?",
+   "Who needs to be contacted, and how?",
+   "Where are the relevant isolation points / equipment / documents?",
+   "Who requires additional assistance and what must be considered?",
+   "What alternative accommodation, staffing, food, laundry, transport or care arrangements are available?",
+   "What happens if the disruption continues beyond 4 / 12 / 24 / 48 hours?",
+   "Who has authority to escalate, relocate people supported or authorise emergency expenditure?"
+  ].map(x=>`<div class="prompt"><b>${x}</b></div>`).join("")}
+  <div class="field"><label>Service-specific contingency plan</label><textarea id="fullsc" style="width:100%;min-height:220px">${esc(a)}</textarea></div>
+  <div class="actions no-print" style="margin-top:12px">
+   <button class="btn primary" onclick="saveFullScenario()">Save Scenario</button>
+   <button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button>
+   <button class="btn teal" onclick="setScreen('learning')">Open Learning Log</button>
+  </div>
+ </div>`;
+}
+function saveFullScenario(){
+ state.scenarioAnswers[state.currentScenario]=document.getElementById("fullsc").value;
+ state.updated=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"});save();setScreen("scenarios");
+}
+function learning(){
+ return header("Testing / Incident & Learning Log")+`
+ <div class="card">
+  <div class="success"><b>What is this log for?</b><br>
+  This is a live record of how the BCP works in practice. Use it for <b>planned tests/exercises and real incidents or disruptions</b>.
+  Capture what happened, what worked, what did not, whether the BCP gave the person managing the event the information they needed, and what should change.
+  <br><br><b>Every test and every significant incident should be used as an opportunity to improve the BCP.</b></div>
+  <div class="actions no-print" style="margin-top:12px"><button class="btn primary" onclick="newLog('Planned exercise')">New Test / Exercise</button><button class="btn teal" onclick="newLog('Real incident')">New Real Incident</button></div>
+ </div>
+ <div class="card"><table class="table"><tr><th>Date</th><th>Type</th><th>Scenario</th><th>Learning</th><th>BCP update?</th><th>Action</th></tr>
+ ${state.logs.map((l,i)=>`<tr><td>${esc(l.date)}</td><td>${esc(l.type)}</td><td>${esc(l.scenario)}</td><td>${esc(l.learning)}</td><td><b>${esc(l.update)}</b></td><td>${l.update==="YES"?`<button class="btn primary" onclick="rebranch(${i})">Update BCP Scenario</button>`:'Closed'}</td></tr>`).join("")}</table></div>`;
+}
+function newLog(type){
+ let today=new Date().toLocaleDateString("en-GB"), i=prompt("Which continuity scenario?\\n\\nEnter the scenario number (1–"+scenarios.length+"):");
+ if(!i)return; i=Math.max(1,Math.min(scenarios.length,parseInt(i,10)||1))-1;
+ let learning=prompt("What happened / what did you learn?");
+ if(learning===null)return;
+ let update=confirm("Does this learning require the BCP to be updated?\\n\\nOK = YES\\nCancel = NO")?"YES":"NO";
+ state.logs.unshift({date:today,type,scenario:scenarios[i],learning,update,action:update==="YES"?"Update scenario":"Closed"});
+ if(update==="YES") state.openActions++;
+ save(); render();
+ if(update==="YES") alert("Learning recorded. The next step is to return to the relevant Continuity Scenario and update it."); 
+}
+function rebranch(i){
+ let l=state.logs[i], idx=scenarios.indexOf(l.scenario); state.currentScenario=idx<0?0:idx; setScreen("scenario");
+}
+function printBCP(){
+ state.printed=state.updated;save();setScreen("print");setTimeout(()=>window.print(),350);
+}
+function printScreen(){window.print()}
+function printPage(){setScreen("print")}
+function printControl(){
+ let stale=state.updated!==state.printed;
+ return header("BCP Update & Grab-Bag Control")+`
+ <div class="card">${stale?`<div class="alert"><b>⚠ PRINT REQUIRED</b><br>The live BCP has changed since the grab-bag copy was printed. Print the current version and replace the old copy.</div>`:`<div class="success"><b>✓ Grab-bag copy current</b><br>The printed copy matches the live BCP version recorded in the builder.</div>`}
+ <h3>Print confirmation</h3>
+ <div class="small">☐ Current BCP printed<br>☐ Old grab-bag copy removed<br>☐ New copy placed in grab bag<br>☐ Update / print date recorded<br>☐ Manager or delegated person confirms replacement</div>
+ <div class="actions no-print" style="margin-top:14px"><button class="btn primary" onclick="printBCP()">Print Current BCP</button><button class="btn" onclick="setScreen('home')">Back to Home</button><button class="btn teal" onclick="setScreen('learning')">Learning Log</button></div>
+ </div>`;
+}
+function render(){
+ let screen=state.screen||"home";
+ document.getElementById("app").innerHTML=screen==="home"?home():screen==="info"?info():screen==="scenarios"?renderScenarios():screen==="scenario"?scenario():screen==="learning"?learning():printControl();
+}
+render();
+</script>
+</body>
+</html>
