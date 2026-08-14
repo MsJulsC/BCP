@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCP – Service Dashboard</title>
+
+<style>
+:root {
+  --ink:#1f2937;
+  --muted:#64748b;
+  --line:#d8dee7;
+  --panel:#ffffff;
+  --bg:#eef2f6;
+  --brand:#1f4e79;
+  --accent:#0f766e;
+  --warn:#a16207;
+  --danger:#b42318;
+  --ok:#166534;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+
+.app {
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px;
+}
+
+.header {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:22px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  box-shadow:0 2px 8px #0000000a;
+}
+
+.brand {
+  font-size:24px;
+  font-weight:700;
+  color:var(--brand);
+}
+
+.subtitle {
+  color:var(--muted);
+  margin-top:5px;
+  font-size:14px;
+}
+
+.badge {
+  background:#e8f3ef;
+  color:var(--ok);
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:13px;
+  font-weight:600;
+}
+
+h1 {
+  font-size:28px;
+  margin:28px 0 6px;
+}
+
+.intro {
+  color:var(--muted);
+  margin-top:0;
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin:22px 0;
+}
+
+.stat {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px;
+}
+
+.stat-label {
+  color:var(--muted);
+  font-size:13px;
+}
+
+.stat-value {
+  font-size:30px;
+  font-weight:700;
+  margin-top:7px;
+}
+
+.stat-note {
+  font-size:12px;
+  margin-top:5px;
+  color:var(--muted);
+}
+
+.section-title {
+  font-size:20px;
+  font-weight:700;
+  margin:30px 0 12px;
+}
+
+.services {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.service {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 2px 8px #00000008;
+}
+
+.service-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.service h3 {
+  margin:0;
+  font-size:18px;
+}
+
+.location {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+}
+
+.status {
+  font-size:12px;
+  font-weight:700;
+  border-radius:999px;
+  padding:6px 9px;
+  white-space:nowrap;
+}
+
+.green {
+  background:#e8f5e9;
+  color:var(--ok);
+}
+
+.amber {
+  background:#fff7df;
+  color:var(--warn);
+}
+
+.red {
+  background:#fdecea;
+  color:var(--danger);
+}
+
+.service-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin:18px 0;
+}
+
+.metric {
+  background:#f7f9fc;
+  border-radius:9px;
+  padding:12px;
+}
+
+.metric-label {
+  font-size:12px;
+  color:var(--muted);
+}
+
+.metric-value {
+  font-size:21px;
+  font-weight:700;
+  margin-top:4px;
+}
+
+.progress-wrap {
+  margin:15px 0;
+}
+
+.progress-label {
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.progress {
+  height:8px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:100%;
+  border-radius:999px;
+}
+
+.service-footer {
+  border-top:1px solid var(--line);
+  padding-top:14px;
+  margin-top:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.review {
+  font-size:12px;
+  color:var(--muted);
+}
+
+button {
+  border:1px solid #b8c3d1;
+  background:#fff;
+  color:var(--ink);
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+button:hover {
+  background:#f5f7fa;
+}
+
+.alerts {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.alert {
+  display:grid;
+  grid-template-columns:110px 1fr 120px;
+  gap:16px;
+  padding:15px 18px;
+  border-bottom:1px solid var(--line);
+  align-items:center;
+}
+
+.alert:last-child {
+  border-bottom:0;
+}
+
+.alert-type {
+  font-size:12px;
+  font-weight:700;
+}
+
+.alert-text {
+  font-size:14px;
+}
+
+.alert-service {
+  color:var(--muted);
+  font-size:12px;
+}
+
+.footer {
+  color:var(--muted);
+  text-align:center;
+  font-size:12px;
+  padding:25px 0 10px;
+}
+
+@media(max-width:900px) {
+  .stats {
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .services {
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:600px) {
+  .app {
+    padding:14px;
+  }
+
+  .header {
+    align-items:flex-start;
+  }
+
+  .stats {
+    grid-template-columns:1fr 1fr;
+  }
+
+  .alert {
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <div>
+      <div class="brand">BCP</div>
+      <div class="subtitle">Service Quality &amp; Assurance Dashboard</div>
+    </div>
+    <div class="badge">TEST ENVIRONMENT</div>
+  </div>
+
+  <h1>Service Overview</h1>
+
+  <p class="intro">
+    An overarching view of service activity, assurance and areas requiring attention.
+  </p>
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-label">Services monitored</div>
+      <div class="stat-value">3</div>
+      <div class="stat-note">Test services</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Overall assurance</div>
+      <div class="stat-value">82%</div>
+      <div class="stat-note">Across all services</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Areas requiring attention</div>
+      <div class="stat-value">4</div>
+      <div class="stat-note">Across 2 services</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Reviews completed</div>
+      <div class="stat-value">11</div>
+      <div class="stat-note">This reporting period</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Service Performance</div>
+
+  <div class="services">
+
+    <!-- SERVICE 1 -->
+    <div class="service">
+
+      <div class="service-top">
+        <div>
+          <h3>Oakfield House</h3>
+          <div class="location">Test Service 01</div>
+        </div>
+        <span class="status green">Good</span>
+      </div>
+
+      <div class="service-grid">
+
+        <div class="metric">
+          <div class="metric-label">Assurance score</div>
+          <div class="metric-value">91%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Open actions</div>
+          <div class="metric-value">1</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Records reviewed</div>
+          <div class="metric-value">28</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Last review</div>
+          <div class="metric-value">12 Aug</div>
+        </div>
+
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Overall completion</span>
+          <span>91%</span>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" style="width:91%;background:#166534;"></div>
+        </div>
+      </div>
+
+      <div class="service-footer">
+        <span class="review">No immediate concerns</span>
+        <button onclick="showService('Oakfield House')">View service</button>
+      </div>
+
+    </div>
+
+
+    <!-- SERVICE 2 -->
+    <div class="service">
+
+      <div class="service-top">
+        <div>
+          <h3>Riverside Lodge</h3>
+          <div class="location">Test Service 02</div>
+        </div>
+        <span class="status amber">Attention</span>
+      </div>
+
+      <div class="service-grid">
+
+        <div class="metric">
+          <div class="metric-label">Assurance score</div>
+          <div class="metric-value">78%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Open actions</div>
+          <div class="metric-value">2</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Records reviewed</div>
+          <div class="metric-value">24</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Last review</div>
+          <div class="metric-value">10 Aug</div>
+        </div>
+
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Overall completion</span>
+          <span>78%</span>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" style="width:78%;background:#a16207;"></div>
+        </div>
+      </div>
+
+      <div class="service-footer">
+        <span class="review">Follow-up required</span>
+        <button onclick="showService('Riverside Lodge')">View service</button>
+      </div>
+
+    </div>
+
+
+    <!-- SERVICE 3 -->
+    <div class="service">
+
+      <div class="service-top">
+        <div>
+          <h3>Meadow View</h3>
+          <div class="location">Test Service 03</div>
+        </div>
+        <span class="status red">Priority</span>
+      </div>
+
+      <div class="service-grid">
+
+        <div class="metric">
+          <div class="metric-label">Assurance score</div>
+          <div class="metric-value">67%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Open actions</div>
+          <div class="metric-value">3</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Records reviewed</div>
+          <div class="metric-value">19</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Last review</div>
+          <div class="metric-value">8 Aug</div>
+        </div>
+
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Overall completion</span>
+          <span>67%</span>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" style="width:67%;background:#b42318;"></div>
+        </div>
+      </div>
+
+      <div class="service-footer">
+        <span class="review">Priority follow-up</span>
+        <button onclick="showService('Meadow View')">View service</button>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="section-title">Areas Requiring Attention</div>
+
+  <div class="alerts">
+
+    <div class="alert">
+      <div class="alert-type" style="color:#b42318;">PRIORITY</div>
+      <div>
+        <div class="alert-text">Three actions remain open beyond expected timescale.</div>
+        <div class="alert-service">Meadow View</div>
+      </div>
+      <div class="alert-service">3 open actions</div>
+    </div>
+
+    <div class="alert">
+      <div class="alert-type" style="color:#a16207;">ATTENTION</div>
+      <div>
+        <div class="alert-text">Two actions require follow-up at the next review.</div>
+        <div class="alert-service">Riverside Lodge</div>
+      </div>
+      <div class="alert-service">2 open actions</div>
+    </div>
+
+    <div class="alert">
+      <div class="alert-type" style="color:#a16207;">ATTENTION</div>
+      <div>
+        <div class="alert-text">One item is approaching its review date.</div>
+        <div class="alert-service">Riverside Lodge</div>
+      </div>
+      <div class="alert-service">Review due</div>
+    </div>
+
+    <div class="alert">
+      <div class="alert-type" style="color:#166534;">POSITIVE</div>
+      <div>
+        <div class="alert-text">No immediate concerns identified during the latest review.</div>
+        <div class="alert-service">Oakfield House</div>
+      </div>
+      <div class="alert-service">91% assurance</div>
+    </div>
+
+  </div>
+
+
+  <div class="footer">
+    Demonstration dashboard using fictional test data only.
+  </div>
+
+</div>
+
+
+<script>
+function showService(service) {
+  alert(
+    service +
+    "\n\nThis button will eventually open the individual service dashboard."
+  );
+}
+</script>
+
+</body>
+</html>
