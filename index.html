@@ -210,67 +210,71 @@ function scenariosView(){
   const s=svc();
   s.answers=s.answers||[];
 
+  const completed=s.answers.filter(a=>a && a.trim()).length;
+  const total=scenarios.length;
+
   return header("Continuity Scenarios — "+esc(s.name),true)+
   `
   <div class="card">
-    <p class="lead">
-      <b>All continuity scenarios are included.</b>
-      Work through each scenario and record what this specific service would need someone on duty to know or do.
-    </p>
 
     <div class="alert">
-      <b>How to use this section</b><br>
-      Consider the practical response for this service — including people who need additional support,
-      key contacts, equipment, locations, alternative arrangements and escalation routes.
+      <b>Continuity scenario completion</b><br>
+      Work through each scenario and record the arrangements that apply specifically
+      to this service. The aim is to make sure someone unfamiliar with the service
+      could understand what needs to happen during an incident.
     </div>
 
-    ${scenarios.map((name,i)=>{
-      let a=s.answers[i]||"";
-      let complete=a.trim().length>0;
+    <div class="metric" style="margin-bottom:14px">
+      <b>${completed} / ${total}</b>
+      <span>scenarios completed</span>
+    </div>
 
-      return `
-      <div class="scenario">
+    <div class="scenario-list">
 
-        <div class="scenario-head">
-          <div>
-            <b>${i+1}. ${esc(name)}</b>
-            ${complete
-              ? badge("ok","Complete")
-              : badge("warn","Needs completion")}
+      ${scenarios.map((name,i)=>{
+        const answer=s.answers[i]||"";
+        const complete=answer.trim().length>0;
+
+        return `
+        <div class="scenario" style="margin-bottom:8px">
+
+          <div class="scenario-head"
+               style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+
+            <div>
+              <b>${i+1}. ${esc(name)}</b>
+            </div>
+
+            <div>
+              ${complete
+                ? badge("ok","Complete")
+                : badge("warn","Needs completion")}
+            </div>
+
           </div>
-        </div>
 
-        <div class="scenario-body">
+          <div class="scenario-body"
+               style="display:flex;justify-content:space-between;align-items:center;gap:15px">
 
-          <div class="prompt">
-            <b>What does this service need someone on duty to know immediately?</b><br>
-            <span class="small">
-              Record the service-specific response. Think about exact locations, contacts,
-              people supported, equipment, alternative arrangements, escalation and any
-              information that would be important during a real incident.
-            </span>
-          </div>
+            <div class="small" style="flex:1">
+              ${complete
+                ? "Service-specific information has been recorded."
+                : "No service-specific information has been recorded yet."}
+            </div>
 
-          <textarea
-            id="sc_${i}"
-            style="width:100%;min-height:120px;border:1px solid #c7d0dc;border-radius:7px;padding:9px"
-            placeholder="Enter the service-specific response..."
-          >${esc(a)}</textarea>
-
-          <div class="actions no-print" style="margin-top:8px">
-            <button class="btn primary" onclick="saveScenario(${i})">
-              Save Scenario
+            <button class="btn primary"
+                    onclick="openScenario(${i})">
+              ${complete ? "Review / Edit Scenario" : "Open Scenario"}
             </button>
 
-            <button class="btn" onclick="openScenario(${i})">
-              Open Full Scenario
-            </button>
           </div>
 
         </div>
-      </div>
-      `;
-    }).join("")}
+        `;
+      }).join("")}
+
+    </div>
+
   </div>
   `;
 }
