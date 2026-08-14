@@ -239,12 +239,54 @@ function learning(){
  ${s.learning.map((l,i)=>`<tr><td>${esc(l.date)}</td><td>${esc(l.type)}</td><td>${esc(l.scenario)}</td><td>${esc(l.learning)}</td><td>${l.update==="YES"?badge("warn","YES"):badge("ok","NO")}</td><td>${l.update==="YES"?`<button class="btn primary" onclick="rebranch(${i})">Update BCP Scenario</button>`:"Closed"}</td></tr>`).join("")}</table></div>`;
 }
 function newLog(type){
- const s=svc(),n=prompt("Which continuity scenario?\\n\\nEnter the scenario number (1–"+scenarios.length+"):");
- if(!n)return;let i=Math.max(1,Math.min(scenarios.length,parseInt(n,10)||1))-1;
- const learning=prompt("What happened / what did you learn?");if(learning===null)return;
- const update=confirm("Does this learning require the BCP to be updated?\\n\\nOK = YES\\nCancel = NO")?"YES":"NO";
- s.learning.unshift({date:today(),type,scenario:scenarios[i],learning,update,action:update==="YES"?"Update BCP Scenario":"Closed"});
- s.events++;if(update==="YES")s.actions++;save();render();
+  const s=svc();
+
+  const scenario=prompt(
+    "Which continuity scenario?\n\n" +
+    scenarios.map((name,i)=>(i+1)+". "+name).join("\n") +
+    "\n\nEnter the scenario name or number:"
+  );
+
+  if(!scenario)return;
+
+  let selectedScenario=scenario.trim();
+
+  const number=parseInt(selectedScenario,10);
+  if(!isNaN(number) && number>=1 && number<=scenarios.length){
+    selectedScenario=scenarios[number-1];
+  }else{
+    const match=scenarios.find(name=>name.toLowerCase()===selectedScenario.toLowerCase());
+    if(match){
+      selectedScenario=match;
+    }else{
+      alert("Please enter one of the scenario names shown.");
+      return;
+    }
+  }
+
+  const learning=prompt("What happened / what did you learn?");
+  if(learning===null)return;
+
+  const update=confirm(
+    "Does this learning require the BCP to be updated?\n\n" +
+    "OK = YES\n" +
+    "Cancel = NO"
+  )?"YES":"NO";
+
+  s.learning.unshift({
+    date:today(),
+    type,
+    scenario:selectedScenario,
+    learning,
+    update,
+    action:update==="YES"?"Update BCP Scenario":"Closed"
+  });
+
+  s.events++;
+  if(update==="YES")s.actions++;
+
+  save();
+  render();
 }
 function rebranch(i){const s=svc(),l=s.learning[i],idx=scenarios.indexOf(l.scenario);s.currentScenario=idx<0?0:idx;setScreen("scenario");}
 function openLogService(id){setService(id);setTimeout(()=>setScreen("learning"),50);}
