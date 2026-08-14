@@ -256,7 +256,7 @@ function newLog(type){
   );
 
   if(scenarioIndex===-1){
-    alert("Please enter the scenario name exactly as shown in the list.");
+    alert("Please enter one of the scenario names shown.");
     return;
   }
 
@@ -280,48 +280,6 @@ function newLog(type){
   s.events++;
 
   if(update==="YES") s.actions++;
-
-  save();
-  render();
-}
-
-  if(!scenario)return;
-
-  let selectedScenario=scenario.trim();
-
-  const number=parseInt(selectedScenario,10);
-  if(!isNaN(number) && number>=1 && number<=scenarios.length){
-    selectedScenario=scenarios[number-1];
-  }else{
-    const match=scenarios.find(name=>name.toLowerCase()===selectedScenario.toLowerCase());
-    if(match){
-      selectedScenario=match;
-    }else{
-      alert("Please enter one of the scenario names shown.");
-      return;
-    }
-  }
-
-  const learning=prompt("What happened / what did you learn?");
-  if(learning===null)return;
-
-  const update=confirm(
-    "Does this learning require the BCP to be updated?\n\n" +
-    "OK = YES\n" +
-    "Cancel = NO"
-  )?"YES":"NO";
-
-  s.learning.unshift({
-    date:today(),
-    type,
-    scenario:selectedScenario,
-    learning,
-    update,
-    action:update==="YES"?"Update BCP Scenario":"Closed"
-  });
-
-  s.events++;
-  if(update==="YES")s.actions++;
 
   save();
   render();
