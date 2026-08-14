@@ -203,7 +203,7 @@ function info(){
 function field(label,key){return `<div class="field"><label>${label}</label><input id="f_${key}" value="${esc(svc()[key]||"")}"></div>`}
 function saveInfo(){
  const s=svc();["name","reviewDate","lastUpdate","printed","phone","manager","assembly","assembly2","grab","gas","electric","water"].forEach(k=>{let e=document.getElementById("f_"+k);if(e)s[k]=e.value});
- s.lastUpdate=today();save();render();
+save();render();
 }
 
 function scenariosView(){
