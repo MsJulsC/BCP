@@ -224,7 +224,7 @@ function scenariosView(){
     </div>
 
     <div class="metric" style="margin-bottom:14px">
-      <b>${completed} / ${total}</b>
+     <b>${completed} / ${scenarios.length}</b>
       <span>scenarios completed</span>
     </div>
 
@@ -277,7 +277,7 @@ function scenariosView(){
   </div>
   `;
 }
-function saveScenario(i){const s=svc();s.answers=s.answers||{};s.answers[i]=document.getElementById("sc_"+i).value;s.lastUpdate=today();s.actions=Math.max(0,s.actions);save();render();}
+function saveScenario(i){const s=svc();s.answers=Array.isArray(s.answers)?s.answers:[];s.answers[i]=document.getElementById("sc_"+i).value;s.lastUpdate=today();s.actions=Math.max(0,s.actions);save();render();}
 function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
 function scenario(){
   const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||[])[i]||"";
@@ -372,7 +372,7 @@ function scenario(){
 
   </div>`;
 }
-function saveFullScenario(){const s=svc();s.answers=s.answers||{};s.answers[s.currentScenario||0]=document.getElementById("fullsc").value;s.lastUpdate=today();save();setScreen("scenarios");}
+function saveFullScenario(){const s=svc();s.answers=Array.isArray(s.answers)?s.answers:[];s.answers[s.currentScenario||0]=document.getElementById("fullsc").value;s.lastUpdate=today();save();setScreen("scenarios");}
 
 function learning(){
  const s=svc();
