@@ -241,11 +241,49 @@ function learning(){
 function newLog(type){
   const s=svc();
 
-  const scenario=prompt(
-    "Which continuity scenario?\n\n" +
-    scenarios.map((name,i)=>(i+1)+". "+name).join("\n") +
-    "\n\nEnter the scenario name or number:"
+  const scenarioList=scenarios.map((name,i)=>(i+1)+". "+name).join("\n");
+
+  const scenarioName=prompt(
+    "Which continuity scenario does this relate to?\n\n"+
+    scenarioList+
+    "\n\nEnter the scenario name:"
   );
+
+  if(!scenarioName) return;
+
+  const scenarioIndex=scenarios.findIndex(
+    name=>name.toLowerCase()===scenarioName.trim().toLowerCase()
+  );
+
+  if(scenarioIndex===-1){
+    alert("Please enter the scenario name exactly as shown in the list.");
+    return;
+  }
+
+  const learning=prompt("What happened / what did you learn?");
+  if(learning===null) return;
+
+  const update=confirm(
+    "Does this learning require the BCP to be updated?\n\n"+
+    "OK = YES\nCancel = NO"
+  ) ? "YES" : "NO";
+
+  s.learning.unshift({
+    date:today(),
+    type:type,
+    scenario:scenarios[scenarioIndex],
+    learning:learning,
+    update:update,
+    action:update==="YES" ? "Update BCP Scenario" : "Closed"
+  });
+
+  s.events++;
+
+  if(update==="YES") s.actions++;
+
+  save();
+  render();
+}
 
   if(!scenario)return;
 
