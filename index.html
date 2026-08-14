@@ -174,7 +174,7 @@ function serviceHome(){
    <div class="metric"><b>${esc(s.reviewDate)}</b><span>Next review</span></div>
   </div>
   <div class="actions no-print" style="margin-top:14px">
-   <button class="btn primary" onclick="setScreen('info')">Open / Edit BCP</button>
+<button class="btn primary" onclick="setScreen('info')">Open / Edit BCP</button>
    <button class="btn teal" onclick="setScreen('learning')">Open Learning Log</button>
    <button class="btn" onclick="setScreen('scenarios')">Continuity Scenarios</button>
    <button class="btn warn" onclick="printBCP()">Print / Grab-bag</button>
@@ -203,7 +203,7 @@ function info(){
 function field(label,key){return `<div class="field"><label>${label}</label><input id="f_${key}" value="${esc(svc()[key]||"")}"></div>`}
 function saveInfo(){
  const s=svc();["name","reviewDate","lastUpdate","printed","phone","manager","assembly","assembly2","grab","gas","electric","water"].forEach(k=>{let e=document.getElementById("f_"+k);if(e)s[k]=e.value});
-save();render();
+save();setScreen('scenarios');
 }
 
 function scenariosView(){
