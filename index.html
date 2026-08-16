@@ -243,21 +243,124 @@ function overview(){
  `).join("")}
 </div>
 
- <div class="dashboard-grid">
-  <div class="card">
-   <div class="section-title"><div><h2>Service status</h2><div class="small">Click a service to open its BCP</div></div><button class="btn no-print" onclick="resetDemo()">Reset demo data</button></div>
-   <div class="service-grid" style="margin-top:12px">
-    ${Object.entries(serviceData).map(([id,s])=>`<div class="service-card" onclick="setService('${id}')">
-      <h3>${esc(s.name)}</h3>${badge(s.status,s.statusText)}
-      <div class="service-meta">
-       <div><b>${s.complete}/17</b><span>Scenarios complete</span></div>
-       <div><b>${s.actions}</b><span>Open actions</span></div>
-       <div><b>${s.events}</b><span>Events/tests</span></div>
-       <div><b>${esc(s.reviewDate)}</b><span>Review date</span></div>
-      </div>
-      <p class="small">${esc(s.summary)}</p>
-     </div>`).join("")}
-   </div>
+ <div style="margin-top:12px">
+
+ ${[
+  {
+   region:"Region A",
+   divisions:[
+    {name:"Division 1",areas:["Alpha","Bravo","Charlie","Delta","Echo"]},
+    {name:"Division 2",areas:["Foxtrot","Golf","Hotel","India","Juliet"]}
+   ]
+  },
+  {
+   region:"Region B",
+   divisions:[
+    {name:"Division 3",areas:["Kilo","Lima","Mike","November","Oscar"]},
+    {name:"Division 4",areas:["Papa","Quebec","Romeo","Sierra","Tango"]}
+   ]
+  }
+ ].map(r=>{
+
+  const regionServices=Object.values(serviceData).filter(s=>s.region===r.region);
+  const regionCurrent=regionServices.filter(s=>s.review==="Current").length;
+  const regionOverdue=regionServices.filter(s=>s.review==="Overdue").length;
+  const regionActions=regionServices.reduce((a,s)=>a+s.actions,0);
+
+  return `
+   <details style="margin-bottom:10px">
+    <summary>
+     <b>${r.region}</b>
+     <span class="small">
+      — ${regionServices.length} services ·
+      ${regionCurrent} current ·
+      ${regionOverdue} overdue ·
+      ${regionActions} open actions
+     </span>
+    </summary>
+
+    <div style="margin:10px 0 0 18px">
+
+     ${r.divisions.map(d=>{
+
+      const divisionServices=Object.values(serviceData)
+       .filter(s=>s.region===r.region && s.division===d.name);
+
+      const divisionCurrent=divisionServices.filter(s=>s.review==="Current").length;
+      const divisionOverdue=divisionServices.filter(s=>s.review==="Overdue").length;
+      const divisionActions=divisionServices.reduce((a,s)=>a+s.actions,0);
+
+      return `
+       <details style="margin-bottom:8px">
+        <summary>
+         <b>${d.name}</b>
+         <span class="small">
+          — ${divisionServices.length} services ·
+          ${divisionCurrent} current ·
+          ${divisionOverdue} overdue ·
+          ${divisionActions} open actions
+         </span>
+        </summary>
+
+        <div style="margin:10px 0 0 18px">
+
+         ${d.areas.map(area=>{
+
+          const areaServices=Object.entries(serviceData)
+           .filter(([id,s])=>
+            s.region===r.region &&
+            s.division===d.name &&
+            s.area===area
+           );
+
+          const areaCurrent=areaServices.filter(([id,s])=>s.review==="Current").length;
+          const areaOverdue=areaServices.filter(([id,s])=>s.review==="Overdue").length;
+          const areaActions=areaServices.reduce((a,[id,s])=>a+s.actions,0);
+
+          return `
+           <details style="margin-bottom:6px">
+            <summary>
+             <b>${area}</b>
+             <span class="small">
+              — ${areaServices.length} services ·
+              ${areaCurrent} current ·
+              ${areaOverdue} overdue ·
+              ${areaActions} open actions
+             </span>
+            </summary>
+
+            <div style="margin:10px 0 10px 18px">
+
+             ${areaServices.map(([id,s])=>`
+              <div class="service-card" style="margin:8px 0;cursor:pointer" onclick="setService('${id}')">
+               <h3>${esc(s.name)}</h3>
+               ${badge(s.status,s.statusText)}
+               <div class="service-meta">
+                <div><b>${s.complete}/17</b><span>Scenarios complete</span></div>
+                <div><b>${s.actions}</b><span>Open actions</span></div>
+                <div><b>${s.events}</b><span>Events/tests</span></div>
+                <div><b>${esc(s.reviewDate)}</b><span>Review date</span></div>
+               </div>
+               <p class="small">${esc(s.summary)}</p>
+              </div>
+             `).join("") || `<p class="small">No services added yet.</p>`}
+
+            </div>
+           </details>
+          `;
+         }).join("")}
+
+        </div>
+       </details>
+      `;
+     }).join("")}
+
+    </div>
+   </details>
+  `;
+ }).join("")}
+
+</div>
   </div>
   <div class="card">
    <h2>Attention required</h2>
