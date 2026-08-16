@@ -174,119 +174,75 @@ function overview(){
    <div class="metric"><b>${events}</b><span>Recorded events / tests</span></div>
   </div>
  </div>
-  <div class="card">
-<h2>Organisational structure</h2>
-<p class="lead">Select a region to view its divisions, areas and services.</p>
 
-<details>
- <summary><b>Region A</b></summary>
+<div class="card">
+ <h2>Organisational structure</h2>
+ <p class="lead">Select a region to view its divisions, areas and services.</p>
 
- <div style="margin:12px 0 0 18px">
-
+ ${[
+  {
+   region:"Region A",
+   divisions:[
+    {name:"Division 1",areas:["Alpha","Bravo","Charlie","Delta","Echo"]},
+    {name:"Division 2",areas:["Foxtrot","Golf","Hotel","India","Juliet"]}
+   ]
+  },
+  {
+   region:"Region B",
+   divisions:[
+    {name:"Division 3",areas:["Kilo","Lima","Mike","November","Oscar"]},
+    {name:"Division 4",areas:["Papa","Quebec","Romeo","Sierra","Tango"]}
+   ]
+  }
+ ].map(r=>`
   <details>
-   <summary><b>Division 1</b></summary>
-
-   <div style="margin:10px 0 10px 18px">
-
-    <details>
-     <summary><b>Alpha</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      ${Object.entries(serviceData)
-       .filter(([id,s])=>s.region==="Region A" && s.division==="Division 1" && s.area==="Alpha")
-       .map(([id,s])=>`
-        <p>
-         <button class="btn" onclick="setService('${id}')">
-          ${esc(s.name)}
-         </button>
-        </p>
-       `).join("")}
-     </div>
-    </details>
-
-    <details>
-     <summary><b>Bravo</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      ${Object.entries(serviceData)
-       .filter(([id,s])=>s.region==="Region A" && s.division==="Division 1" && s.area==="Bravo")
-       .map(([id,s])=>`
-        <p>
-         <button class="btn" onclick="setService('${id}')">
-          ${esc(s.name)}
-         </button>
-        </p>
-       `).join("")}
-     </div>
-    </details>
-
-   <details>
- <summary><b>Charlie</b></summary>
- <div style="margin:10px 0 10px 18px">
-  ${Object.entries(serviceData)
-   .filter(([id,s])=>s.region==="Region A" && s.division==="Division 1" && s.area==="Charlie")
-   .map(([id,s])=>`
-    <p>
-     <button class="btn" onclick="setService('${id}')">
-      ${esc(s.name)}
-     </button>
-    </p>
-   `).join("")}
- </div>
-</details>
-
-    <details>
-     <summary><b>Delta</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      <p class="small">No services added yet.</p>
-     </div>
-    </details>
-
-    <details>
-     <summary><b>Echo</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      <p class="small">No services added yet.</p>
-     </div>
-    </details>
-
-   </div>
-  </details>
-
-  <details>
-   <summary><b>Division 2</b></summary>
-   <div style="margin:10px 0 10px 18px">
-    <p class="small">Services will be added here.</p>
-   </div>
-  </details>
-
- </div>
-</details>
-
-  <details style="margin-top:10px">
-   <summary><b>Region B</b></summary>
+   <summary><b>${r.region}</b></summary>
 
    <div style="margin:12px 0 0 18px">
-    <details>
-     <summary><b>Division 3</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      <p><b>Kilo</b> — Bala House · Snowdon House</p>
-      <p><b>Lima</b> — Llyn Tegid House · Cadair Idris House</p>
-      <p><b>Mike</b> — Wye House · Malvern House</p>
-      <p><b>November</b> — Severn House · Cleeve House</p>
-      <p><b>Oscar</b> — Avon House · Mendip House</p>
-     </div>
-    </details>
 
-    <details>
-     <summary><b>Division 4</b></summary>
-     <div style="margin:10px 0 10px 18px">
-      <p><b>Papa</b> — Loch Lomond House · Ben Lomond House</p>
-      <p><b>Quebec</b> — Loch Ness House · Ben Nevis House</p>
-      <p><b>Romeo</b> — Loch Katrine House · Ben Lawers House</p>
-      <p><b>Sierra</b> — Tay House · Schiehallion House</p>
-      <p><b>Tango</b> — Dee House · Cairngorm House</p>
-     </div>
-    </details>
+    ${r.divisions.map(d=>`
+     <details>
+      <summary><b>${d.name}</b></summary>
+
+      <div style="margin:10px 0 10px 18px">
+
+       ${d.areas.map(area=>`
+        <details>
+         <summary><b>${area}</b></summary>
+
+         <div style="margin:10px 0 10px 18px">
+
+          ${
+           Object.entries(serviceData)
+            .filter(([id,s])=>
+             s.region===r.region &&
+             s.division===d.name &&
+             s.area===area
+            )
+            .map(([id,s])=>`
+             <p>
+              <button class="btn" onclick="setService('${id}')">
+               ${esc(s.name)}
+              </button>
+             </p>
+            `).join("")
+           ||
+           `<p class="small">No services added yet.</p>`
+          }
+
+         </div>
+        </details>
+       `).join("")}
+
+      </div>
+     </details>
+    `).join("")}
+
    </div>
   </details>
+ `).join("")}
+</div>
+
  <div class="dashboard-grid">
   <div class="card">
    <div class="section-title"><div><h2>Service status</h2><div class="small">Click a service to open its BCP</div></div><button class="btn no-print" onclick="resetDemo()">Reset demo data</button></div>
