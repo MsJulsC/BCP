@@ -608,37 +608,47 @@ function scenario(){
     </div>
 
     <div class="card" style="margin-top:14px">
-      <h3>Scenario images</h3>
-      <p class="small">
-        Add up to 5 images that would help someone unfamiliar with the service understand
-        the arrangements quickly. For example, you could show an isolation point,
-        equipment, a grab bag, an alternative location or another important physical feature.
-      </p>
+  <h3>Scenario images</h3>
+  <p class="small">
+    Add up to 5 photographs that would help someone unfamiliar with the service
+    understand the arrangements quickly. For example, an isolation point,
+    emergency equipment, grab bag, alternative location or another important
+    physical feature.
+  </p>
 
-      ${[0,1,2,3,4].map(n=>`
-        <div style="border:1px solid var(--line);border-radius:9px;padding:12px;margin:10px 0;background:#f8fafc">
-          <b>Image ${n+1}</b>
-          <div class="field" style="margin-top:8px">
-            <label>Image URL</label>
-            <input id="img_${n}" value="${esc(s.images[n]?.url||"")}"
-              placeholder="Paste image URL here">
-          </div>
-          <div class="field" style="margin-top:8px">
-            <label>Caption / what the image shows</label>
-            <input id="imgcap_${n}" value="${esc(s.images[n]?.caption||"")}"
-              placeholder="e.g. Electricity isolation point">
-          </div>
-          ${s.images[n]?.url?`
-            <div style="margin-top:10px">
-              <img src="${esc(s.images[n].url)}"
-                   alt="${esc(s.images[n].caption||"Scenario image")}"
-                   style="max-width:100%;max-height:220px;border-radius:7px;border:1px solid var(--line)">
-            </div>
-          `:""}
+  ${[0,1,2,3,4].map(n=>`
+    <div style="border:1px solid var(--line);border-radius:9px;padding:12px;margin:10px 0;background:#f8fafc">
+      <b>Image ${n+1}</b>
+
+      <div class="field" style="margin-top:8px">
+        <label>Choose photograph</label>
+        <input
+          type="file"
+          id="img_${n}"
+          accept="image/*"
+        >
+      </div>
+
+      <div class="field" style="margin-top:8px">
+        <label>Caption / what the image shows</label>
+        <input
+          id="imgcap_${n}"
+          value="${esc(s.images[n]?.caption||"")}"
+          placeholder="e.g. Electricity isolation point">
+      </div>
+
+      ${s.images[n]?.url?`
+        <div style="margin-top:10px">
+          <img
+            src="${esc(s.images[n].url)}"
+            alt="${esc(s.images[n].caption||"Scenario image")}"
+            style="max-width:100%;max-height:220px;border-radius:7px;border:1px solid var(--line)"
+          >
         </div>
-      `).join("")}
+      `:""}
     </div>
-
+  `).join("")}
+</div>
     <div class="actions no-print" style="margin-top:12px">
       <button class="btn primary" onclick="saveFullScenario()">Save Scenario</button>
       <button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button>
@@ -647,23 +657,60 @@ function scenario(){
 
   </div>`;
 }
-function saveFullScenario(){
+async function saveFullScenario(){
   const s=svc();
   const i=s.currentScenario||0;
 
   s.answers=Array.isArray(s.answers)?s.answers:[];
   s.answers[i]=document.getElementById("fullsc").value;
 
-  s.images=[];
+  s.images=Array.isArray(s.images)?s.images:[];
+
+  const files=[];
+
   for(let n=0;n<5;n++){
-    const url=document.getElementById("img_"+n)?.value.trim();
+    const input=document.getElementById("img_"+n);
     const caption=document.getElementById("imgcap_"+n)?.value.trim();
+
+    files.push({
+      file:input?.files?.[0]||null,
+      caption,
+      existing:s.images[n]?.url||""
+    });
+  }
+
+  const readFile=file=>new Promise(resolve=>{
+    if(!file){
+      resolve("");
+      return;
+    }
+
+    const reader=new FileReader();
+    reader.onload=e=>resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  const newImages=[];
+
+  for(const item of files){
+    const url=await readFile(item.file);
+
     if(url){
-      s.images.push({url,caption});
+      newImages.push({
+        url,
+        caption:item.caption
+      });
+    }else if(item.existing){
+      newImages.push({
+        url:item.existing,
+        caption:item.caption
+      });
     }
   }
 
+  s.images=newImages;
   s.lastUpdate=today();
+
   save();
   setScreen("scenarios");
 }
