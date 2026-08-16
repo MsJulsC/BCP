@@ -27,7 +27,46 @@ h1{font-size:24px;margin:0 0 6px;color:var(--brand)}h2{font-size:18px;margin:0 0
 .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}.section-title{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .footer{color:#718096;font-size:11px;padding:18px 2px;text-align:center}.hidden{display:none!important}
 @media(max-width:900px){.grid,.fieldgrid,.service-grid,.dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.grid,.fieldgrid,.service-grid,.dashboard-grid{grid-template-columns:1fr}.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column}}
-@media print{body{background:#fff}.app{max-width:none;padding:0}.no-print{display:none!important}.card{box-shadow:none;break-inside:avoid}.topbar{box-shadow:none}}
+@page{
+  size:A4 portrait;
+  margin:12mm;
+}
+
+@media print{
+  html,body{
+    background:#fff;
+    margin:0;
+    padding:0;
+  }
+
+  .app{
+    max-width:none;
+    padding:0;
+  }
+
+  .no-print{
+    display:none!important;
+  }
+
+  .card{
+    box-shadow:none;
+    break-inside:avoid;
+  }
+
+  .topbar{
+    box-shadow:none;
+  }
+
+  .print-cover,
+  .print-intro{
+    box-sizing:border-box;
+    width:100%;
+  }
+
+  .print-scenario{
+    break-before:page;
+  }
+}
 </style>
 </head>
 <body>
@@ -747,83 +786,65 @@ function preparePrint(){
   if(!root) return;
 
   const cover=root.querySelector(".print-cover");
-  const scenarios=root.querySelectorAll(".print-scenario");
+  const scenarios=Array.from(
+    root.querySelectorAll(".print-scenario")
+  );
 
   if(!cover || !scenarios.length) return;
 
   /*
-    A4 page height at 96 CSS pixels per inch.
-    This matches the browser's standard print layout.
+    A4 printable height.
+
+    A4 = 297mm high.
+    Print margin = 12mm top + 12mm bottom.
+    Printable height = 273mm.
+
+    At 96 CSS pixels per inch this is approximately
+    1032px.
   */
-  const pageHeightPx=1122.52;
+  const mmToPx=96/25.4;
+  const pageHeight=(297-24)*mmToPx;
 
   /*
-    Wait for images to finish loading before measuring.
-    This is important because images can change the height
-    of the scenarios and therefore change their page numbers.
+    Scenario 1 starts on page 3 because:
+      Page 1 = Emergency cover
+      Page 2 = BCP information
   */
-  const images=Array.from(root.querySelectorAll("img"));
+  let currentPage=3;
 
-  const waitForImages=images.map(img=>{
-    if(img.complete) return Promise.resolve();
+  scenarios.forEach((scenario,i)=>{
 
-    return new Promise(resolve=>{
-      img.addEventListener("load",resolve,{once:true});
-      img.addEventListener("error",resolve,{once:true});
-    });
-  });
+    const pageCell=
+      cover.querySelector('[data-page="'+i+'"]');
 
-  Promise.all(waitForImages).then(()=>{
+    if(pageCell){
+      pageCell.textContent=currentPage;
+    }
 
     /*
-      Give the browser a moment to finish laying out
-      the document before calculating page positions.
+      Work out how many printed pages this scenario
+      occupies.
+
+      A small allowance prevents tiny amounts of overflow
+      from incorrectly creating an additional page.
     */
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
+    const height=scenario.getBoundingClientRect().height;
 
-        const coverTop=cover.getBoundingClientRect().top;
+    const pagesUsed=Math.max(
+      1,
+      Math.ceil((height-5)/pageHeight)
+    );
 
-        scenarios.forEach((scenario,i)=>{
-
-          const scenarioTop=
-            scenario.getBoundingClientRect().top;
-
-          /*
-            Calculate how many printed A4 pages have passed
-            since the emergency cover began.
-          */
-          const distanceFromCover=
-            scenarioTop-coverTop;
-
-          const page=
-            Math.floor(
-              distanceFromCover/pageHeightPx
-            )+1;
-
-          const pageCell=
-            cover.querySelector(
-              '[data-page="'+i+'"]'
-            );
-
-          if(pageCell){
-            pageCell.textContent=page;
-          }
-
-        });
-
-        /*
-          Allow the page numbers to be written into the
-          emergency cover before opening print preview.
-        */
-        setTimeout(()=>{
-          window.print();
-        },100);
-
-      });
-    });
-
+    currentPage+=pagesUsed;
   });
+
+  /*
+    Give the browser time to update the page numbers
+    before opening the print dialogue.
+  */
+  setTimeout(()=>{
+    window.print();
+  },150);
 }
  
 function printControl(){
