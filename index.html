@@ -450,9 +450,16 @@ save();setScreen('scenarios');
 
 function scenariosView(){
   const s=svc();
-  s.answers=Array.isArray(s.answers)?s.answers:[];
 
-  const completed=s.answers.filter(a=>a && a.trim()).length;
+  s.scenarioAnswers=Array.isArray(s.scenarioAnswers)
+    ? s.scenarioAnswers
+    : [];
+
+  const completed=s.scenarioAnswers.filter(answers=>{
+    return Array.isArray(answers)
+      && answers.length>=8
+      && answers.slice(0,8).every(a=>String(a||"").trim().length>0);
+  }).length;
 
   return header("Continuity Scenarios — "+esc(s.name),true)+
   `
@@ -461,20 +468,45 @@ function scenariosView(){
     <div class="alert">
       <b>Continuity scenario completion</b><br>
       Work through each scenario and record the arrangements that apply specifically
-      to this service. The aim is to make sure someone unfamiliar with the service
-      could understand what needs to happen during an incident.
+      to this service. All 8 questions must be answered before a scenario is marked
+      as complete.
     </div>
 
     <div class="metric" style="margin-bottom:14px">
-     <b>${completed} / ${scenarios.length}</b>
+      <b>${completed} / ${scenarios.length}</b>
       <span>scenarios completed</span>
     </div>
+
+    ${completed===scenarios.length
+      ? `
+        <div class="success" style="margin-bottom:14px">
+          <b>✓ BCP complete</b><br>
+          All ${scenarios.length} continuity scenarios have been completed and the
+          BCP is ready for printing.
+        </div>
+      `
+      : `
+        <div class="alert" style="margin-bottom:14px">
+          <b>BCP not yet complete</b><br>
+          ${scenarios.length-completed} scenario${scenarios.length-completed===1?"":"s"}
+          still require completion.
+        </div>
+      `
+    }
 
     <div class="scenario-list">
 
       ${scenarios.map((name,i)=>{
-        const answer=s.answers[i]||"";
-        const complete=answer.trim().length>0;
+
+        const answers=Array.isArray(s.scenarioAnswers[i])
+          ? s.scenarioAnswers[i]
+          : [];
+
+        const answered=answers.filter(a=>String(a||"").trim().length>0).length;
+
+        const complete=
+          answers.length>=8 &&
+          answers.slice(0,8).every(a=>String(a||"").trim().length>0);
 
         return `
         <div class="scenario" style="margin-bottom:8px">
@@ -499,8 +531,8 @@ function scenariosView(){
 
             <div class="small" style="flex:1">
               ${complete
-                ? "Service-specific information has been recorded."
-                : "No service-specific information has been recorded yet."}
+                ? "All 8 service-specific questions have been answered."
+                : `${answered} / 8 questions answered.`}
             </div>
 
             <button class="btn primary"
