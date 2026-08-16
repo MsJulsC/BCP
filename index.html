@@ -119,36 +119,89 @@ function overview(){
   </div>
  </div>
   <div class="card">
-  <h2>Organisational structure</h2>
-  <p class="lead">Select a region to view its divisions, areas and services.</p>
+<h2>Organisational structure</h2>
+<p class="lead">Select a region to view its divisions, areas and services.</p>
+
+<details>
+ <summary><b>Region A</b></summary>
+
+ <div style="margin:12px 0 0 18px">
 
   <details>
-   <summary><b>Region A</b></summary>
+   <summary><b>Division 1</b></summary>
 
-   <div style="margin:12px 0 0 18px">
+   <div style="margin:10px 0 10px 18px">
+
     <details>
-     <summary><b>Division 1</b></summary>
+     <summary><b>Alpha</b></summary>
      <div style="margin:10px 0 10px 18px">
-      <p><b>Alpha</b> — Windermere House · Scafell House</p>
-      <p><b>Bravo</b> — Ullswater House · Helvellyn House</p>
-      <p><b>Charlie</b> — Derwentwater House · Skiddaw House</p>
-      <p><b>Delta</b> — Coniston House · Blencathra House</p>
-      <p><b>Echo</b> — Buttermere House · Great Gable House</p>
+      ${Object.entries(serviceData)
+       .filter(([id,s])=>s.region==="Region A" && s.division==="Division 1" && s.area==="Alpha")
+       .map(([id,s])=>`
+        <p>
+         <button class="btn" onclick="setService('${id}')">
+          ${esc(s.name)}
+         </button>
+        </p>
+       `).join("")}
      </div>
     </details>
 
     <details>
-     <summary><b>Division 2</b></summary>
+     <summary><b>Bravo</b></summary>
      <div style="margin:10px 0 10px 18px">
-      <p><b>Foxtrot</b> — Grasmere House · Catbells House</p>
-      <p><b>Golf</b> — Bassenthwaite House · Fairfield House</p>
-      <p><b>Hotel</b> — Haweswater House · High Street House</p>
-      <p><b>India</b> — Wastwater House · Great End House</p>
-      <p><b>Juliet</b> — Ennerdale House · Pillar House</p>
+      ${Object.entries(serviceData)
+       .filter(([id,s])=>s.region==="Region A" && s.division==="Division 1" && s.area==="Bravo")
+       .map(([id,s])=>`
+        <p>
+         <button class="btn" onclick="setService('${id}')">
+          ${esc(s.name)}
+         </button>
+        </p>
+       `).join("")}
      </div>
     </details>
+
+    <details>
+     <summary><b>Charlie</b></summary>
+     <div style="margin:10px 0 10px 18px">
+      <p class="small">No services added yet.</p>
+     </div>
+    </details>
+
+    <details>
+     <summary><b>Delta</b></summary>
+     <div style="margin:10px 0 10px 18px">
+      <p class="small">No services added yet.</p>
+     </div>
+    </details>
+
+    <details>
+     <summary><b>Echo</b></summary>
+     <div style="margin:10px 0 10px 18px">
+      <p class="small">No services added yet.</p>
+     </div>
+    </details>
+
    </div>
   </details>
+
+  <details>
+   <summary><b>Division 2</b></summary>
+   <div style="margin:10px 0 10px 18px">
+    <p class="small">Services will be added here.</p>
+   </div>
+  </details>
+
+ </div>
+</details>
+
+<details style="margin-top:10px">
+ <summary><b>Region B</b></summary>
+ <div style="margin:12px 0 0 18px">
+  <p class="small">Divisions and services will be added here.</p>
+ </div>
+</details>
 
   <details style="margin-top:10px">
    <summary><b>Region B</b></summary>
