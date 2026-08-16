@@ -244,14 +244,14 @@ function overview(){
 </div>
 
 <div class="dashboard-grid">
- <div class="card">
-  <div class="section-title">
-   <div>
-    <h2>Service status</h2>
-    <div class="small">Select a region, division or area to view service status</div>
-   </div>
+<details class="card">
+  <summary style="cursor:pointer;font-size:18px;font-weight:700;color:var(--brand)">
+    Service status
+    <span class="small" style="font-weight:400"> — select a region, division or area to view service status</span>
+  </summary>
+
+  <div style="margin-top:12px">
    <button class="btn no-print" onclick="resetDemo()">Reset demo data</button>
-  </div>
 
   <div style="margin-top:12px">
 
@@ -380,6 +380,8 @@ function overview(){
    </div>`).join("")}
   </div>
  </div>
+ </details>
+ 
  <div class="card">
   <div class="section-title"><div><h2>Learning & incidents</h2><div class="small">A cross-service view of recorded tests and real-life events</div></div></div>
   <table class="table"><tr><th>Date</th><th>Service</th><th>Type</th><th>Scenario</th><th>Learning / issue</th><th>BCP update?</th></tr>
