@@ -243,7 +243,17 @@ function overview(){
  `).join("")}
 </div>
 
- <div style="margin-top:12px">
+<div class="dashboard-grid">
+ <div class="card">
+  <div class="section-title">
+   <div>
+    <h2>Service status</h2>
+    <div class="small">Select a region, division or area to view service status</div>
+   </div>
+   <button class="btn no-print" onclick="resetDemo()">Reset demo data</button>
+  </div>
+
+  <div style="margin-top:12px">
 
  ${[
   {
