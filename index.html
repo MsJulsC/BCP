@@ -710,11 +710,197 @@ function rebranch(i){const s=svc(),l=s.learning[i],idx=scenarios.indexOf(l.scena
 function openLogService(id){setService(id);setTimeout(()=>setScreen("learning"),50);}
 function printBCP(){const s=svc();s.printed=s.lastUpdate;save();setScreen("print");setTimeout(()=>window.print(),350);}
 function printControl(){
- const s=svc(),stale=s.lastUpdate!==s.printed;
- return header("BCP Update & Grab-Bag Control — "+esc(s.name),true)+`
- <div class="card">${stale?`<div class="alert"><b>⚠ PRINT REQUIRED</b><br>The live BCP has changed since the grab-bag copy was printed. Print the current version and replace the old copy.</div>`:`<div class="success"><b>✓ Grab-bag copy current</b><br>The printed copy matches the live BCP version recorded in the builder.</div>`}
- <h3>Print confirmation</h3><div class="small">☐ Current BCP printed<br>☐ Old grab-bag copy removed<br>☐ New copy placed in grab bag<br>☐ Update / print date recorded<br>☐ Manager or delegated person confirms replacement</div>
- <div class="actions no-print" style="margin-top:14px"><button class="btn primary" onclick="printBCP()">Print Current BCP</button><button class="btn" onclick="setScreen('serviceHome')">Back to Service</button></div></div>`;
+  const s=svc();
+
+  const completedScenarios=scenarios.map((name,i)=>{
+    const answers=Array.isArray(s.scenarioAnswers?.[i])
+      ? s.scenarioAnswers[i]
+      : [];
+
+    const images=Array.isArray(s.scenarioImages?.[i])
+      ? s.scenarioImages[i]
+      : [];
+
+    const hasAnswers=answers.some(a=>String(a||"").trim());
+    const hasImages=images.some(img=>img?.url);
+
+    return {
+      name,
+      answers,
+      images,
+      included:hasAnswers||hasImages
+    };
+  }).filter(x=>x.included);
+
+  return header("Business Continuity Plan - "+esc(s.name),true)+`
+
+    <div class="card">
+      <h2>Business Continuity Plan</h2>
+
+      <table class="table">
+        <tr>
+          <th>Service</th>
+          <td>${esc(s.name)}</td>
+        </tr>
+        <tr>
+          <th>Region</th>
+          <td>${esc(s.region||"")}</td>
+        </tr>
+        <tr>
+          <th>Division</th>
+          <td>${esc(s.division||"")}</td>
+        </tr>
+        <tr>
+          <th>Area</th>
+          <td>${esc(s.area||"")}</td>
+        </tr>
+        <tr>
+          <th>Last updated</th>
+          <td>${esc(s.lastUpdate||"")}</td>
+        </tr>
+        <tr>
+          <th>Next review</th>
+          <td>${esc(s.reviewDate||"")}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="success">
+      <b>Grab-bag copy</b><br>
+      This document contains the current service-specific contingency arrangements recorded in the BCP Builder.
+    </div>
+
+    <div class="card">
+      <h2>Continuity scenarios</h2>
+
+      <p class="small">
+        The following scenarios contain service-specific information recorded for
+        ${esc(s.name)}.
+      </p>
+
+      ${completedScenarios.length===0
+        ? `<div class="alert">
+             No continuity scenarios have been completed yet.
+           </div>`
+        : completedScenarios.map((sc)=>`
+
+          <div class="card" style="page-break-inside:avoid;margin-top:18px">
+
+            <h2>${esc(sc.name)}</h2>
+
+            ${[
+              "What should happen first?",
+              "Who needs to be contacted, and how?",
+              "Who is most affected by this disruption?",
+              "What equipment, information or documents might be needed?",
+              "Where is everything located?",
+              "What alternative arrangements would be needed?",
+              "What could make this situation worse?",
+              "What would someone unfamiliar with this service need to know?"
+            ].map((question,n)=>`
+
+              <div style="margin-top:14px">
+                <b>${n+1}. ${esc(question)}</b>
+
+                ${sc.answers[n]
+                  ? `<div style="
+                      margin-top:6px;
+                      padding:10px;
+                      border:1px solid var(--line);
+                      border-radius:7px;
+                      background:#f8fafc;
+                      white-space:pre-wrap;
+                    ">${esc(sc.answers[n])}</div>`
+                  : `<div class="small" style="margin-top:6px">
+                       No service-specific information recorded.
+                     </div>`
+                }
+              </div>
+
+            `).join("")}
+
+            ${sc.images.length
+              ? `
+                <div style="margin-top:18px">
+                  <h3>Scenario images</h3>
+
+                  ${sc.images.map((img)=>`
+                    <div style="
+                      margin-top:12px;
+                      page-break-inside:avoid;
+                    ">
+                      <img
+                        src="${esc(img.url)}"
+                        alt="${esc(img.caption||"Scenario image")}"
+                        style="
+                          max-width:100%;
+                          max-height:300px;
+                          border:1px solid var(--line);
+                          border-radius:7px;
+                        "
+                      >
+
+                      ${img.caption
+                        ? `<div class="small" style="margin-top:5px">
+                             <b>${esc(img.caption)}</b>
+                           </div>`
+                        : ""
+                      }
+                    </div>
+                  `).join("")}
+
+                </div>
+              `
+              : ""
+            }
+
+          </div>
+
+        `).join("")
+      }
+
+    </div>
+
+    <div class="card no-print">
+      <h3>Print / Grab-bag control</h3>
+
+      <p class="small">
+        Before replacing the physical grab-bag copy, confirm that the current
+        BCP has been printed and the previous version removed.
+      </p>
+
+      <label>
+        <input type="checkbox">
+        Current BCP printed
+      </label><br>
+
+      <label>
+        <input type="checkbox">
+        Old grab-bag copy removed
+      </label><br>
+
+      <label>
+        <input type="checkbox">
+        New copy placed in grab bag
+      </label><br>
+
+      <label>
+        <input type="checkbox">
+        Update / print date recorded
+      </label><br>
+
+      <label>
+        <input type="checkbox">
+        Manager or delegated person confirms replacement
+      </label>
+    </div>
+
+    <div class="actions no-print" style="margin-top:14px">
+      <button class="btn primary" onclick="window.print()">Print BCP</button>
+      <button class="btn" onclick="setScreen('servicehome')">Back to Service</button>
+    </div>
+
+  `;
 }
 function resetDemo(){if(confirm("Reset the three fictional test services to the original demonstration data?")){serviceData=JSON.parse(JSON.stringify(demoServices));save();render();}}
 function render(){
