@@ -741,164 +741,383 @@ const s=svc(),n=prompt("Which continuity scenario?\n\n"+scenarios.map((name,i)=>
 function rebranch(i){const s=svc(),l=s.learning[i],idx=scenarios.indexOf(l.scenario);s.currentScenario=idx<0?0:idx;setScreen("scenario");}
 function openLogService(id){setService(id);setTimeout(()=>setScreen("learning"),50);}
 function printBCP(){const s=svc();s.printed=s.lastUpdate;save();setScreen("print");setTimeout(()=>window.print(),350);}
+
+function preparePrint(){
+  const root=document.getElementById("app");
+  if(!root) return;
+
+  const cover=root.querySelector(".print-cover");
+  const scenarios=root.querySelectorAll(".print-scenario");
+
+  if(!cover || !scenarios.length) return;
+
+  const pageHeightPx=1122;
+  const rootTop=root.getBoundingClientRect().top;
+
+  scenarios.forEach((el,i)=>{
+    const top=el.getBoundingClientRect().top-rootTop;
+    const page=Math.floor(top/pageHeightPx)+1;
+
+    const pageCell=cover.querySelector('[data-page="'+i+'"]');
+
+    if(pageCell){
+      pageCell.textContent=page;
+    }
+  });
+
+  window.print();
+}
+ 
 function printControl(){
   const s=svc();
 
-  const completedScenarios=scenarios.map((name,i)=>{
+  const completeAll=scenarios.every((name,i)=>{
     const answers=Array.isArray(s.scenarioAnswers?.[i])
       ? s.scenarioAnswers[i]
       : [];
 
-    const images=Array.isArray(s.scenarioImages?.[i])
-      ? s.scenarioImages[i]
+    return answers.length>=8 &&
+      answers.slice(0,8).every(a=>String(a||"").trim().length>0);
+  });
+
+  const completedCount=scenarios.filter((name,i)=>{
+    const answers=Array.isArray(s.scenarioAnswers?.[i])
+      ? s.scenarioAnswers[i]
       : [];
 
-    const hasAnswers=answers.some(a=>String(a||"").trim());
-    const hasImages=images.some(img=>img?.url);
+    return answers.length>=8 &&
+      answers.slice(0,8).every(a=>String(a||"").trim().length>0);
+  }).length;
 
-    return {
-      name,
-      answers,
-      images,
-      included:hasAnswers||hasImages
-    };
-  }).filter(x=>x.included);
+  if(!completeAll){
+    return header("Business Continuity Plan - "+esc(s.name),true)+`
+
+      <div class="card">
+        <h2>Business Continuity Plan</h2>
+
+        <div class="alert">
+          <b>Business Continuity Plan not ready to print</b><br><br>
+
+          ${completedCount} of ${scenarios.length} continuity scenarios
+          have been completed.
+
+          <br><br>
+
+          All ${scenarios.length} scenarios must be completed before the
+          emergency grab-bag copy can be printed.
+        </div>
+
+        <div class="actions no-print" style="margin-top:14px">
+          <button class="btn primary"
+                  onclick="setScreen('scenarios')">
+            Return to Continuity Scenarios
+          </button>
+
+          <button class="btn"
+                  onclick="setScreen('servicehome')">
+            Back to Service
+          </button>
+        </div>
+      </div>
+
+    `;
+  }
+
+  const questions=[
+    "What should happen first?",
+    "Who needs to be contacted, and how?",
+    "Who is most affected by this disruption?",
+    "What equipment, information or documents might be needed?",
+    "Where is everything located?",
+    "What alternative arrangements would be needed?",
+    "What could make this situation worse?",
+    "What would someone unfamiliar with this service need to know?"
+  ];
 
   return header("Business Continuity Plan - "+esc(s.name),true)+`
 
-    <div class="card">
-      <h2>Business Continuity Plan</h2>
+    <!-- EMERGENCY COVER -->
 
-      <table class="table">
-        <tr>
-          <th>Service</th>
-          <td>${esc(s.name)}</td>
-        </tr>
-        <tr>
-          <th>Region</th>
-          <td>${esc(s.region||"")}</td>
-        </tr>
-        <tr>
-          <th>Division</th>
-          <td>${esc(s.division||"")}</td>
-        </tr>
-        <tr>
-          <th>Area</th>
-          <td>${esc(s.area||"")}</td>
-        </tr>
-        <tr>
-          <th>Last updated</th>
-          <td>${esc(s.lastUpdate||"")}</td>
-        </tr>
-        <tr>
-          <th>Next review</th>
-          <td>${esc(s.reviewDate||"")}</td>
-        </tr>
-      </table>
+    <div class="print-cover" style="
+      min-height:900px;
+      padding:28px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      page-break-after:always;
+      box-sizing:border-box;
+    ">
+
+      <div style="
+        border:2px solid var(--brand);
+        border-radius:12px;
+        padding:22px;
+        margin-bottom:20px;
+      ">
+
+        <div style="
+          font-size:30px;
+          font-weight:800;
+          color:var(--brand);
+        ">
+          BUSINESS CONTINUITY PLAN
+        </div>
+
+        <div style="
+          font-size:22px;
+          font-weight:800;
+          margin-top:8px;
+        ">
+          EMERGENCY — START HERE
+        </div>
+
+        <div style="
+          margin-top:18px;
+          font-size:17px;
+        ">
+          <b>Service:</b> ${esc(s.name)}
+        </div>
+
+        <div style="
+          margin-top:6px;
+          font-size:17px;
+        ">
+          <b>Last updated:</b> ${esc(s.lastUpdate||"")}
+        </div>
+
+      </div>
+
+      <div class="alert" style="font-size:15px;margin-bottom:20px">
+        <b>If something unexpected happens at the service</b><br><br>
+
+        Use this page to find the information you need quickly.
+        Find what has happened below and go directly to the page shown.
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <h2>FIND THE INFORMATION YOU NEED</h2>
+
+        <table class="table" style="width:100%">
+          <tr>
+            <th>What has happened?</th>
+            <th style="width:110px;text-align:center">Go to page</th>
+          </tr>
+
+          ${scenarios.map((name,i)=>`
+            <tr>
+              <td>
+                <b>${i+1}. ${esc(name)}</b>
+              </td>
+
+              <td style="
+                text-align:center;
+                font-size:20px;
+                font-weight:800;
+              ">
+                <span data-page="${i}">—</span>
+              </td>
+            </tr>
+          `).join("")}
+
+        </table>
+      </div>
+
+      <div style="
+        margin-top:22px;
+        padding:16px;
+        border:2px solid var(--brand);
+        border-radius:10px;
+        background:#f8fafc;
+      ">
+        <b>If you cannot find what you need</b><br><br>
+
+        Speak to the <b>Manager or on-call manager</b> immediately
+        and follow their instructions.
+      </div>
+
     </div>
 
-    <div class="success">
-      <b>Grab-bag copy</b><br>
-      This document contains the current service-specific contingency arrangements recorded in the BCP Builder.
+
+    <!-- BCP INFORMATION PAGE -->
+
+    <div class="print-intro" style="
+      page-break-after:always;
+      min-height:900px;
+    ">
+
+      <div class="card">
+        <h2>Business Continuity Plan</h2>
+
+        <table class="table">
+
+          <tr>
+            <th>Service</th>
+            <td>${esc(s.name)}</td>
+          </tr>
+
+          <tr>
+            <th>Region</th>
+            <td>${esc(s.region||"")}</td>
+          </tr>
+
+          <tr>
+            <th>Division</th>
+            <td>${esc(s.division||"")}</td>
+          </tr>
+
+          <tr>
+            <th>Area</th>
+            <td>${esc(s.area||"")}</td>
+          </tr>
+
+          <tr>
+            <th>Last updated</th>
+            <td>${esc(s.lastUpdate||"")}</td>
+          </tr>
+
+          <tr>
+            <th>Next review</th>
+            <td>${esc(s.reviewDate||"")}</td>
+          </tr>
+
+        </table>
+      </div>
+
+      <div class="success">
+        <b>Grab-bag copy</b><br>
+        This document contains the current service-specific contingency
+        arrangements recorded in the Business Continuity Plan.
+      </div>
+
+      <div class="card">
+        <h2>Continuity scenarios</h2>
+
+        <p class="small">
+          The following pages contain the service-specific arrangements
+          for each continuity scenario.
+        </p>
+
+        <p class="small">
+          Use the emergency cover sheet at the front of this document
+          to find the relevant page quickly.
+        </p>
+      </div>
+
     </div>
 
-    <div class="card">
-      <h2>Continuity scenarios</h2>
 
-      <p class="small">
-        The following scenarios contain service-specific information recorded for
-        ${esc(s.name)}.
-      </p>
+    <!-- ALL 17 SCENARIOS -->
 
-      ${completedScenarios.length===0
-        ? `<div class="alert">
-             No continuity scenarios have been completed yet.
-           </div>`
-        : completedScenarios.map((sc)=>`
+    ${scenarios.map((name,i)=>{
 
-          <div class="card" style="page-break-inside:avoid;margin-top:18px">
+      const answers=Array.isArray(s.scenarioAnswers?.[i])
+        ? s.scenarioAnswers[i]
+        : [];
 
-            <h2>${esc(sc.name)}</h2>
+      const images=Array.isArray(s.scenarioImages?.[i])
+        ? s.scenarioImages[i]
+        : [];
 
-            ${[
-              "What should happen first?",
-              "Who needs to be contacted, and how?",
-              "Who is most affected by this disruption?",
-              "What equipment, information or documents might be needed?",
-              "Where is everything located?",
-              "What alternative arrangements would be needed?",
-              "What could make this situation worse?",
-              "What would someone unfamiliar with this service need to know?"
-            ].map((question,n)=>`
+      return `
 
-              <div style="margin-top:14px">
+        <div
+          class="print-scenario"
+          data-scenario-index="${i}"
+          style="
+            page-break-before:always;
+            page-break-inside:auto;
+          "
+        >
+
+          <div class="card">
+
+            <h2>
+              Scenario ${i+1}: ${esc(name)}
+            </h2>
+
+            ${questions.map((question,n)=>`
+
+              <div style="
+                margin-top:16px;
+                page-break-inside:avoid;
+              ">
+
                 <b>${n+1}. ${esc(question)}</b>
 
-                ${sc.answers[n]
-                  ? `<div style="
-                      margin-top:6px;
-                      padding:10px;
-                      border:1px solid var(--line);
-                      border-radius:7px;
-                      background:#f8fafc;
-                      white-space:pre-wrap;
-                    ">${esc(sc.answers[n])}</div>`
-                  : `<div class="small" style="margin-top:6px">
-                       No service-specific information recorded.
-                     </div>`
-                }
+                <div style="
+                  margin-top:7px;
+                  padding:11px;
+                  border:1px solid var(--line);
+                  border-radius:7px;
+                  background:#f8fafc;
+                  white-space:pre-wrap;
+                ">${esc(answers[n]||"")}</div>
+
               </div>
 
             `).join("")}
 
-            ${sc.images.length
-              ? `
-                <div style="margin-top:18px">
-                  <h3>Scenario images</h3>
 
-                  ${sc.images.map((img)=>`
-                    <div style="
-                      margin-top:12px;
-                      page-break-inside:avoid;
-                    ">
-                      <img
-                        src="${esc(img.url)}"
-                        alt="${esc(img.caption||"Scenario image")}"
-                        style="
-                          max-width:100%;
-                          max-height:300px;
-                          border:1px solid var(--line);
-                          border-radius:7px;
-                        "
-                      >
+            ${images.length ? `
 
-                      ${img.caption
-                        ? `<div class="small" style="margin-top:5px">
-                             <b>${esc(img.caption)}</b>
-                           </div>`
-                        : ""
-                      }
-                    </div>
-                  `).join("")}
+              <div style="
+                margin-top:22px;
+                page-break-inside:avoid;
+              ">
 
-                </div>
-              `
-              : ""
-            }
+                <h3>Scenario images</h3>
+
+                ${images.map((img)=>`
+
+                  <div style="
+                    margin-top:14px;
+                    page-break-inside:avoid;
+                  ">
+
+                    <img
+                      src="${esc(img.url)}"
+                      alt="${esc(img.caption||"Scenario image")}"
+                      style="
+                        max-width:100%;
+                        max-height:300px;
+                        border:1px solid var(--line);
+                        border-radius:7px;
+                      "
+                    >
+
+                    ${img.caption ? `
+                      <div class="small" style="margin-top:5px">
+                        <b>${esc(img.caption)}</b>
+                      </div>
+                    ` : ""}
+
+                  </div>
+
+                `).join("")}
+
+              </div>
+
+            ` : ""}
 
           </div>
 
-        `).join("")
-      }
+        </div>
 
-    </div>
+      `;
 
-    <div class="card no-print">
+    }).join("")}
+
+
+    <!-- PRINT CONTROL -->
+
+    <div class="card no-print" style="margin-top:18px">
+
       <h3>Print / Grab-bag control</h3>
 
       <p class="small">
-        Before replacing the physical grab-bag copy, confirm that the current
-        BCP has been printed and the previous version removed.
+        Before replacing the physical grab-bag copy, confirm that the
+        current Business Continuity Plan has been printed and the previous
+        version removed.
       </p>
 
       <label>
@@ -925,11 +1144,21 @@ function printControl(){
         <input type="checkbox">
         Manager or delegated person confirms replacement
       </label>
+
     </div>
 
     <div class="actions no-print" style="margin-top:14px">
-      <button class="btn primary" onclick="window.print()">Print BCP</button>
-      <button class="btn" onclick="setScreen('servicehome')">Back to Service</button>
+
+      <button class="btn primary"
+              onclick="preparePrint()">
+        Print Business Continuity Plan
+      </button>
+
+      <button class="btn"
+              onclick="setScreen('servicehome')">
+        Back to Service
+      </button>
+
     </div>
 
   `;
