@@ -804,54 +804,107 @@ function preparePrint(){
 
   if(!cover || !scenarios.length) return;
 
-  /*
-    A4 portrait with 12mm print margins.
-    Printable height = 297mm - 24mm = 273mm.
-  */
   const mmToPx=96/25.4;
-  const pageHeightPx=273*mmToPx;
+
+  // A4 printable area with 12mm margins
+  const pageWidth=186*mmToPx;
+  const pageHeight=273*mmToPx;
 
   /*
-    Page 1 = Emergency cover
-    Page 2 = BCP information
-    Scenario 1 therefore starts on Page 3.
+    Create a hidden measurement area using the same
+    width as the actual printed page.
   */
-  let currentPage=3;
+  const measure=document.createElement("div");
 
-  scenarios.forEach((scenario,i)=>{
+  measure.style.position="absolute";
+  measure.style.left="-100000px";
+  measure.style.top="0";
+  measure.style.width=pageWidth+"px";
+  measure.style.visibility="hidden";
+  measure.style.boxSizing="border-box";
+  measure.style.background="#fff";
 
-    const pageCell=cover.querySelector(
-      '[data-page="'+i+'"]'
-    );
+  document.body.appendChild(measure);
 
-    if(pageCell){
-      pageCell.textContent=currentPage;
-    }
+  /*
+    Clone each scenario into the print-sized area.
+    This makes text wrap at the same width as the
+    printed document.
+  */
+  const clones=scenarios.map(scenario=>{
 
-    /*
-      Because every scenario has:
-        break-before: page;
+    const clone=scenario.cloneNode(true);
 
-      we only need to calculate how many A4 pages
-      that individual scenario occupies.
-    */
-    const height=scenario.getBoundingClientRect().height;
+    clone.style.width=pageWidth+"px";
+    clone.style.boxSizing="border-box";
+    clone.style.display="block";
+    clone.style.position="relative";
+    clone.style.margin="0";
+    clone.style.padding="0";
+    clone.style.breakBefore="auto";
+    clone.style.pageBreakBefore="auto";
 
-    const pagesUsed=Math.max(
-      1,
-      Math.ceil((height-2)/pageHeightPx)
-    );
+    measure.appendChild(clone);
 
-    currentPage+=pagesUsed;
+    return clone;
   });
 
   /*
-    Give the browser time to update the page numbers
-    before opening the print dialogue.
+    Wait for cloned images to load before measuring.
   */
-  setTimeout(()=>{
-    window.print();
-  },150);
+  const images=Array.from(measure.querySelectorAll("img"));
+
+  const waitForImages=images.map(img=>{
+    if(img.complete) return Promise.resolve();
+
+    return new Promise(resolve=>{
+      img.addEventListener("load",resolve,{once:true});
+      img.addEventListener("error",resolve,{once:true});
+    });
+  });
+
+  Promise.all(waitForImages).then(()=>{
+
+    /*
+      Start after:
+      Page 1 = Emergency cover
+      Page 2 = BCP information
+    */
+    let currentPage=3;
+
+    clones.forEach((clone,i)=>{
+
+      const pageCell=cover.querySelector(
+        '[data-page="'+i+'"]'
+      );
+
+      if(pageCell){
+        pageCell.textContent=currentPage;
+      }
+
+      const height=clone.getBoundingClientRect().height;
+
+      const pagesUsed=Math.max(
+        1,
+        Math.ceil((height-2)/pageHeight)
+      );
+
+      currentPage+=pagesUsed;
+    });
+
+    /*
+      Remove the measurement copy.
+    */
+    measure.remove();
+
+    /*
+      Allow the cover numbers to update before printing.
+    */
+    setTimeout(()=>{
+      window.print();
+    },200);
+
+  });
 }
  
 function printControl(){
