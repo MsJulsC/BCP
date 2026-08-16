@@ -522,8 +522,50 @@ function scenariosView(){
 function saveScenario(i){const s=svc();s.answers=Array.isArray(s.answers)?s.answers:[];s.answers[i]=document.getElementById("sc_"+i).value;s.lastUpdate=today();s.actions=Math.max(0,s.actions);save();render();}
 function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
 function scenario(){
-  const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||[])[i]||"";
- const images=Array.isArray(s.scenarioImages?.[i])?s.scenarioImages[i]:[];
+  const s=svc();
+  const i=s.currentScenario||0;
+  const name=scenarios[i];
+
+  s.scenarioAnswers=Array.isArray(s.scenarioAnswers)?s.scenarioAnswers:[];
+  const answers=Array.isArray(s.scenarioAnswers[i])?s.scenarioAnswers[i]:[];
+
+  s.scenarioImages=Array.isArray(s.scenarioImages)?s.scenarioImages:[];
+  const images=Array.isArray(s.scenarioImages[i])?s.scenarioImages[i]:[];
+
+  const prompts=[
+    {
+      title:"What should happen first?",
+      help:"What are the immediate actions the person on duty should take? Think about keeping people safe, assessing the situation and escalating appropriately."
+    },
+    {
+      title:"Who needs to be contacted, and how?",
+      help:"Include relevant internal contacts, emergency services, professionals, families, suppliers or other key people. Where useful, include names, roles and contact details."
+    },
+    {
+      title:"Who is most affected by this disruption?",
+      help:"Consider people supported, their individual needs, communication, mobility, health, routines, behaviours, equipment and any additional risks."
+    },
+    {
+      title:"What equipment, information or documents might be needed?",
+      help:"Think about essential equipment, medication, records, emergency information, keys, access arrangements, contact lists and anything else that may be needed quickly."
+    },
+    {
+      title:"Where is everything located?",
+      help:"Be specific. For example: water stop cock, gas isolation point, electrical isolation point, fire equipment, emergency grab bag, keys, important documents or alternative equipment."
+    },
+    {
+      title:"What alternative arrangements would be needed?",
+      help:"Consider alternative accommodation, staffing, food, medication, transport, equipment, communication or other arrangements."
+    },
+    {
+      title:"What could make this situation worse?",
+      help:"Consider foreseeable risks, vulnerable people, time of day, staffing levels, access issues, weather, neighbouring services or other factors that could affect the response."
+    },
+    {
+      title:"What would someone unfamiliar with this service need to know?",
+      help:"Imagine a manager from another service has to take charge. What information would they need immediately to make safe and informed decisions?"
+    }
+  ];
 
   return header("Continuity Scenario - "+name,true)+`
 
@@ -531,124 +573,60 @@ function scenario(){
 
     <div class="alert">
       <b>Scenario purpose</b><br>
-      This section helps you think through what someone on duty would need to know and do if this disruption happened at your service.
-      The aim is to capture practical, service-specific information rather than general instructions.
+      Record the practical, service-specific arrangements that someone on duty would need to know if this disruption happened at the service.
     </div>
 
-    <h3>Prompts for the manager</h3>
+    ${prompts.map((p,n)=>`
+      <div class="prompt">
+        <b>${n+1}. ${esc(p.title)}</b><br>
+        <span class="small">${esc(p.help)}</span>
+      </div>
 
-    <div class="prompt">
-      <b>1. What should happen first?</b><br>
-      <span class="small">
-        What are the immediate actions the person on duty should take?
-        Think about keeping people safe, assessing the situation and escalating appropriately.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>2. Who needs to be contacted, and how?</b><br>
-      <span class="small">
-        Include relevant internal contacts, emergency services, professionals, families,
-        suppliers or other key people. Where useful, include names, roles and contact details.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>3. Who is most affected by this disruption?</b><br>
-      <span class="small">
-        Consider people supported at the service, their individual needs, communication,
-        mobility, health, routines, behaviours, equipment and any additional risks.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>4. What equipment, information or documents might be needed?</b><br>
-      <span class="small">
-        Think about essential equipment, medication, records, emergency information,
-        keys, access arrangements, contact lists and anything else that may be needed quickly.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>5. Where is everything located?</b><br>
-      <span class="small">
-        Be specific. For example: water stop cock, gas isolation point, electrical isolation point,
-        fire equipment, emergency grab bag, keys, important documents or alternative equipment.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>6. What alternative arrangements would be needed?</b><br>
-      <span class="small">
-        Consider alternative accommodation, staffing, food, medication, transport,
-        equipment, communication or other arrangements.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>7. What could make this situation worse?</b><br>
-      <span class="small">
-        Consider foreseeable risks, vulnerable people, time of day, staffing levels,
-        access issues, weather, neighbouring services or other factors that could affect the response.
-      </span>
-    </div>
-
-    <div class="prompt">
-      <b>8. What would someone unfamiliar with this service need to know?</b><br>
-      <span class="small">
-        Imagine a manager from another service has to take charge. What information would
-        they need immediately to make safe and informed decisions?
-      </span>
-    </div>
-
-    <div class="field">
-      <label>Service-specific contingency plan</label>
-      <textarea id="fullsc" style="width:100%;min-height:300px"
-        placeholder="Use the prompts above to record the practical arrangements for this service.">${esc(a)}</textarea>
-    </div>
+      <div class="field" style="margin:8px 0 16px">
+        <label>Additional information / service-specific arrangements</label>
+        <textarea
+          id="answer_${n}"
+          style="width:100%;min-height:100px"
+          placeholder="Enter the arrangements that apply specifically to this service...">${esc(answers[n]||"")}</textarea>
+      </div>
+    `).join("")}
 
     <div class="card" style="margin-top:14px">
-  <h3>Scenario images</h3>
-  <p class="small">
-    Add up to 5 photographs that would help someone unfamiliar with the service
-    understand the arrangements quickly. For example, an isolation point,
-    emergency equipment, grab bag, alternative location or another important
-    physical feature.
-  </p>
+      <h3>Scenario images</h3>
+      <p class="small">
+        Add up to 5 photographs that would help someone unfamiliar with the service
+        understand the arrangements quickly. Images are stored against this scenario only.
+      </p>
 
-  ${[0,1,2,3,4].map(n=>`
-    <div style="border:1px solid var(--line);border-radius:9px;padding:12px;margin:10px 0;background:#f8fafc">
-      <b>Image ${n+1}</b>
+      ${[0,1,2,3,4].map(n=>`
+        <div style="border:1px solid var(--line);border-radius:9px;padding:12px;margin:10px 0;background:#f8fafc">
+          <b>Image ${n+1}</b>
 
-      <div class="field" style="margin-top:8px">
-        <label>Choose photograph</label>
-        <input
-          type="file"
-          id="img_${n}"
-          accept="image/*"
-        >
-      </div>
+          <div class="field" style="margin-top:8px">
+            <label>Choose photograph</label>
+            <input type="file" id="img_${n}" accept="image/*">
+          </div>
 
-      <div class="field" style="margin-top:8px">
-        <label>Caption / what the image shows</label>
-        <input
-          id="imgcap_${n}"
-          value="${esc(images[n]?.caption||"")}"
-          placeholder="e.g. Electricity isolation point">
-      </div>
+          <div class="field" style="margin-top:8px">
+            <label>Caption / what the image shows</label>
+            <input
+              id="imgcap_${n}"
+              value="${esc(images[n]?.caption||"")}"
+              placeholder="e.g. Electricity isolation point">
+          </div>
 
-      ${images[n]?.url?`
-        <div style="margin-top:10px">
-          <img
-            src="${esc(images[n].url)}"
-            alt="${esc(images[n].caption||"Scenario image")}"
-            style="max-width:100%;max-height:220px;border-radius:7px;border:1px solid var(--line)"
-          >
+          ${images[n]?.url?`
+            <div style="margin-top:10px">
+              <img
+                src="${esc(images[n].url)}"
+                alt="${esc(images[n].caption||"Scenario image")}"
+                style="max-width:100%;max-height:220px;border-radius:7px;border:1px solid var(--line)">
+            </div>
+          `:""}
         </div>
-      `:""}
+      `).join("")}
     </div>
-  `).join("")}
-</div>
+
     <div class="actions no-print" style="margin-top:12px">
       <button class="btn primary" onclick="saveFullScenario()">Save Scenario</button>
       <button class="btn" onclick="setScreen('scenarios')">Back to Scenarios</button>
@@ -661,55 +639,51 @@ async function saveFullScenario(){
   const s=svc();
   const i=s.currentScenario||0;
 
-  s.answers=Array.isArray(s.answers)?s.answers:[];
-  s.answers[i]=document.getElementById("fullsc").value;
+  s.scenarioAnswers=Array.isArray(s.scenarioAnswers)?s.scenarioAnswers:[];
 
- s.scenarioImages=Array.isArray(s.scenarioImages)?s.scenarioImages:[];
-const images=Array.isArray(s.scenarioImages[i])?s.scenarioImages[i]:[];
+  const answers=[];
 
-  const files=[];
+  for(let n=0;n<8;n++){
+    answers[n]=document.getElementById("answer_"+n)?.value||"";
+  }
+
+  s.scenarioAnswers[i]=answers;
+
+  s.scenarioImages=Array.isArray(s.scenarioImages)?s.scenarioImages:[];
+
+  const existingImages=Array.isArray(s.scenarioImages[i])
+    ? s.scenarioImages[i]
+    : [];
+
+  const newImages=[];
 
   for(let n=0;n<5;n++){
     const input=document.getElementById("img_"+n);
     const caption=document.getElementById("imgcap_"+n)?.value.trim();
+    const file=input?.files?.[0];
 
-    files.push({
-      file:input?.files?.[0]||null,
-      caption,
-      existing:images[n]?.url||""
-    });
-  }
+    if(file){
+      const url=await new Promise(resolve=>{
+        const reader=new FileReader();
+        reader.onload=e=>resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
 
-  const readFile=file=>new Promise(resolve=>{
-    if(!file){
-      resolve("");
-      return;
-    }
-
-    const reader=new FileReader();
-    reader.onload=e=>resolve(e.target.result);
-    reader.readAsDataURL(file);
-  });
-
-  const newImages=[];
-
-  for(const item of files){
-    const url=await readFile(item.file);
-
-    if(url){
       newImages.push({
         url,
-        caption:item.caption
+        caption
       });
-    }else if(item.existing){
+
+    }else if(existingImages[n]){
       newImages.push({
-        url:item.existing,
-        caption:item.caption
+        url:existingImages[n].url,
+        caption
       });
     }
   }
 
- s.scenarioImages[i]=newImages;
+  s.scenarioImages[i]=newImages;
+
   s.lastUpdate=today();
 
   save();
