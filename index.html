@@ -523,7 +523,7 @@ function saveScenario(i){const s=svc();s.answers=Array.isArray(s.answers)?s.answ
 function openScenario(i){svc().currentScenario=i;setScreen("scenario");}
 function scenario(){
   const s=svc(),i=s.currentScenario||0,name=scenarios[i],a=(s.answers||[])[i]||"";
-  s.images=Array.isArray(s.images)?s.images:[];
+ const images=Array.isArray(s.scenarioImages?.[i])?s.scenarioImages[i]:[];
 
   return header("Continuity Scenario - "+name,true)+`
 
@@ -633,15 +633,15 @@ function scenario(){
         <label>Caption / what the image shows</label>
         <input
           id="imgcap_${n}"
-          value="${esc(s.images[n]?.caption||"")}"
+          value="${esc(images[n]?.caption||"")}"
           placeholder="e.g. Electricity isolation point">
       </div>
 
-      ${s.images[n]?.url?`
+      ${images[n]?.url?`
         <div style="margin-top:10px">
           <img
-            src="${esc(s.images[n].url)}"
-            alt="${esc(s.images[n].caption||"Scenario image")}"
+            src="${esc(images[n].url)}"
+            alt="${esc(images[n].caption||"Scenario image")}"
             style="max-width:100%;max-height:220px;border-radius:7px;border:1px solid var(--line)"
           >
         </div>
@@ -664,7 +664,8 @@ async function saveFullScenario(){
   s.answers=Array.isArray(s.answers)?s.answers:[];
   s.answers[i]=document.getElementById("fullsc").value;
 
-  s.images=Array.isArray(s.images)?s.images:[];
+ s.scenarioImages=Array.isArray(s.scenarioImages)?s.scenarioImages:[];
+const images=Array.isArray(s.scenarioImages[i])?s.scenarioImages[i]:[];
 
   const files=[];
 
@@ -675,7 +676,7 @@ async function saveFullScenario(){
     files.push({
       file:input?.files?.[0]||null,
       caption,
-      existing:s.images[n]?.url||""
+      existing:images[n]?.url||""
     });
   }
 
@@ -708,7 +709,7 @@ async function saveFullScenario(){
     }
   }
 
-  s.images=newImages;
+  s.scenarioImages=newImages;
   s.lastUpdate=today();
 
   save();
