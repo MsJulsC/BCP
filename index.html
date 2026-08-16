@@ -751,21 +751,79 @@ function preparePrint(){
 
   if(!cover || !scenarios.length) return;
 
-  const pageHeightPx=1122;
-  const rootTop=root.getBoundingClientRect().top;
+  /*
+    A4 page height at 96 CSS pixels per inch.
+    This matches the browser's standard print layout.
+  */
+  const pageHeightPx=1122.52;
 
-  scenarios.forEach((el,i)=>{
-    const top=el.getBoundingClientRect().top-rootTop;
-    const page=Math.floor(top/pageHeightPx)+1;
+  /*
+    Wait for images to finish loading before measuring.
+    This is important because images can change the height
+    of the scenarios and therefore change their page numbers.
+  */
+  const images=Array.from(root.querySelectorAll("img"));
 
-    const pageCell=cover.querySelector('[data-page="'+i+'"]');
+  const waitForImages=images.map(img=>{
+    if(img.complete) return Promise.resolve();
 
-    if(pageCell){
-      pageCell.textContent=page;
-    }
+    return new Promise(resolve=>{
+      img.addEventListener("load",resolve,{once:true});
+      img.addEventListener("error",resolve,{once:true});
+    });
   });
 
-  window.print();
+  Promise.all(waitForImages).then(()=>{
+
+    /*
+      Give the browser a moment to finish laying out
+      the document before calculating page positions.
+    */
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+
+        const coverTop=cover.getBoundingClientRect().top;
+
+        scenarios.forEach((scenario,i)=>{
+
+          const scenarioTop=
+            scenario.getBoundingClientRect().top;
+
+          /*
+            Calculate how many printed A4 pages have passed
+            since the emergency cover began.
+          */
+          const distanceFromCover=
+            scenarioTop-coverTop;
+
+          const page=
+            Math.floor(
+              distanceFromCover/pageHeightPx
+            )+1;
+
+          const pageCell=
+            cover.querySelector(
+              '[data-page="'+i+'"]'
+            );
+
+          if(pageCell){
+            pageCell.textContent=page;
+          }
+
+        });
+
+        /*
+          Allow the page numbers to be written into the
+          emergency cover before opening print preview.
+        */
+        setTimeout(()=>{
+          window.print();
+        },100);
+
+      });
+    });
+
+  });
 }
  
 function printControl(){
@@ -904,21 +962,21 @@ function printControl(){
           </tr>
 
           ${scenarios.map((name,i)=>`
-            <tr>
-              <td>
-                <b>${i+1}. ${esc(name)}</b>
-              </td>
+  <tr>
+    <td>
+      <b>${i+1}. ${esc(name)}</b>
+    </td>
 
-              <td style="
-                text-align:center;
-                font-size:20px;
-                font-weight:800;
-              ">
-                <span data-page="${i}">—</span>
-              </td>
-            </tr>
-          `).join("")}
-
+    <td style="
+      width:110px;
+      text-align:center;
+      font-size:20px;
+      font-weight:800;
+    ">
+      <span data-page="${i}">—</span>
+    </td>
+  </tr>
+`).join("")}
         </table>
       </div>
 
