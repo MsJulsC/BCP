@@ -63,9 +63,11 @@ h1{font-size:24px;margin:0 0 6px;color:var(--brand)}h2{font-size:18px;margin:0 0
     width:100%;
   }
 
-  .print-scenario{
-    break-before:page;
-  }
+.print-scenario{
+  break-before:page;
+  width:186mm;
+  box-sizing:border-box;
+}
 }
 </style>
 </head>
@@ -779,8 +781,18 @@ const s=svc(),n=prompt("Which continuity scenario?\n\n"+scenarios.map((name,i)=>
 }
 function rebranch(i){const s=svc(),l=s.learning[i],idx=scenarios.indexOf(l.scenario);s.currentScenario=idx<0?0:idx;setScreen("scenario");}
 function openLogService(id){setService(id);setTimeout(()=>setScreen("learning"),50);}
-function printBCP(){const s=svc();s.printed=s.lastUpdate;save();setScreen("print");setTimeout(()=>window.print(),350);}
+function printBCP(){
+  const s=svc();
 
+  s.printed=s.lastUpdate;
+  save();
+
+  setScreen("print");
+
+  setTimeout(()=>{
+    preparePrint();
+  },500);
+}
 function preparePrint(){
   const root=document.getElementById("app");
   if(!root) return;
@@ -793,46 +805,41 @@ function preparePrint(){
   if(!cover || !scenarios.length) return;
 
   /*
-    A4 printable height.
-
-    A4 = 297mm high.
-    Print margin = 12mm top + 12mm bottom.
-    Printable height = 273mm.
-
-    At 96 CSS pixels per inch this is approximately
-    1032px.
+    A4 portrait with 12mm print margins.
+    Printable height = 297mm - 24mm = 273mm.
   */
   const mmToPx=96/25.4;
-  const pageHeight=(297-24)*mmToPx;
+  const pageHeightPx=273*mmToPx;
 
   /*
-    Scenario 1 starts on page 3 because:
-      Page 1 = Emergency cover
-      Page 2 = BCP information
+    Page 1 = Emergency cover
+    Page 2 = BCP information
+    Scenario 1 therefore starts on Page 3.
   */
   let currentPage=3;
 
   scenarios.forEach((scenario,i)=>{
 
-    const pageCell=
-      cover.querySelector('[data-page="'+i+'"]');
+    const pageCell=cover.querySelector(
+      '[data-page="'+i+'"]'
+    );
 
     if(pageCell){
       pageCell.textContent=currentPage;
     }
 
     /*
-      Work out how many printed pages this scenario
-      occupies.
+      Because every scenario has:
+        break-before: page;
 
-      A small allowance prevents tiny amounts of overflow
-      from incorrectly creating an additional page.
+      we only need to calculate how many A4 pages
+      that individual scenario occupies.
     */
     const height=scenario.getBoundingClientRect().height;
 
     const pagesUsed=Math.max(
       1,
-      Math.ceil((height-5)/pageHeight)
+      Math.ceil((height-2)/pageHeightPx)
     );
 
     currentPage+=pagesUsed;
