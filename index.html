@@ -86,7 +86,7 @@ function badge(status,text){return `<span class="badge ${status}">${text}</span>
 function header(title,serviceMode=false){
  const s=svc();
  return `<div class="topbar">
- <div><div class="brand">Business Continuity Plan Builder</div><div class="sub">${serviceMode?`Service: ${esc(s.name)}`:"Organisational BCP Overview"} • Version 8 prototype</div></div>
+ <div><div class="brand">Business Continuity Plan Builder</div><div class="sub">${serviceMode?`Service: ${esc(s.name)}`:"Organisational Business Continuity Plan Overview"} • Version 8 prototype</div></div>
  <div class="actions no-print">
  <button class="btn" onclick="setScreen('overview')">Overview</button>
  ${serviceMode?`<button class="btn" onclick="setScreen('serviceHome')">Service Home</button><button class="btn" onclick="setScreen('learning')">Learning Log</button><button class="btn" onclick="printBCP()">Print BCP</button>`:""}
@@ -105,7 +105,7 @@ function overview(){
  if(l.learning.toLowerCase().includes("grab-bag")||l.learning.toLowerCase().includes("grab bag"))themeCounts["Grab-bag assurance"]=(themeCounts["Grab-bag assurance"]||0)+1;
  if(l.scenario==="Loss of Electricity")themeCounts["Loss of electricity"]=(themeCounts["Loss of electricity"]||0)+1;});
  const themes=Object.entries(themeCounts).sort((a,b)=>b[1]-a[1]);
- return header("Organisational BCP Overview")+`
+ return header("Organisational Business Continuity Plan Overview")+`
  <div class="card">
   <div class="kicker">Live assurance position — demonstration data</div>
   <p class="lead">A single view of service BCP status, learning, actions and recurring themes. Select a service to open its BCP and follow learning back into the relevant continuity scenario.</p>
