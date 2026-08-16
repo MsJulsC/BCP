@@ -709,7 +709,7 @@ const images=Array.isArray(s.scenarioImages[i])?s.scenarioImages[i]:[];
     }
   }
 
-  s.scenarioImages=newImages;
+ s.scenarioImages[i]=newImages;
   s.lastUpdate=today();
 
   save();
