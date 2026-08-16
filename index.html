@@ -44,7 +44,8 @@ const scenarios=[
 
 const demoServices={
 oak:{
-name:"Oakfield House",status:"ok",statusText:"Current & tested",review:"Current",reviewDate:"30 September 2026",
+name:"Oakfield House",region:"Region A",division:"Division 1",area:"Alpha",
+status:"ok",statusText:"Current & tested",review:"Current",reviewDate:"30 September 2026",
 lastUpdate:"06 August 2026",printed:"06 August 2026",complete:17,actions:0,events:1,
 summary:"BCP is complete and recently tested. One learning event is recorded and closed.",
 learning:[
@@ -53,7 +54,8 @@ learning:[
 themes:["Emergency arrangements tested successfully"]
 },
 river:{
-name:"Riverside Lodge",status:"warn",statusText:"Actions outstanding",review:"Current",reviewDate:"15 October 2026",
+name:"Riverside Lodge",region:"Region A",division:"Division 1",area:"Alpha",
+status:"warn",statusText:"Actions outstanding",review:"Current",reviewDate:"15 October 2026",
 lastUpdate:"04 August 2026",printed:"04 August 2026",complete:17,actions:4,events:2,
 summary:"A real electricity disruption identified weaknesses in contingency arrangements. Four actions remain open.",
 learning:[
@@ -63,7 +65,8 @@ learning:[
 themes:["Alternative communication arrangements","Staffing escalation threshold"]
 },
 meadow:{
-name:"Meadow View",status:"danger",statusText:"Review overdue",review:"Overdue",reviewDate:"31 July 2026",
+name:"Meadow View",region:"Region A",division:"Division 1",area:"Bravo",
+status:"danger",statusText:"Review overdue",review:"Overdue",reviewDate:"31 July 2026",
 lastUpdate:"14 June 2026",printed:"10 June 2026",complete:14,actions:2,events:1,
 summary:"Review is overdue and three continuity scenarios still require service-specific information.",
 learning:[
@@ -72,7 +75,6 @@ learning:[
 themes:["Alternative accommodation","Grab-bag assurance"]
 }
 };
-
 let currentService="oak",screen="overview";
 let serviceData=JSON.parse(localStorage.getItem("bcp8_services")||"null")||JSON.parse(JSON.stringify(demoServices));
 
