@@ -29,7 +29,17 @@ h1{font-size:24px;margin:0 0 6px;color:var(--brand)}h2{font-size:18px;margin:0 0
 @media(max-width:900px){.grid,.fieldgrid,.service-grid,.dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.grid,.fieldgrid,.service-grid,.dashboard-grid{grid-template-columns:1fr}.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column}}
 @page{
   size:A4 portrait;
-  margin:12mm;
+  margin:16mm 12mm 18mm 12mm;
+
+  @bottom-left{
+    content:"Business Continuity Plan — Oakfield House";
+    font-size:9pt;
+  }
+
+  @bottom-right{
+    content:"Page " counter(page) " of " counter(pages);
+    font-size:9pt;
+  }
 }
 
 @media print{
